@@ -1,6 +1,3 @@
-setup:
-	sh setup.sh
-
 install:
 	poetry install
 

@@ -13,8 +13,9 @@ logging.basicConfig(format=FORMAT, level=logging.INFO)
 URL = os.environ.get('URL')
 
 def fetch_image():
+    driver = Driver(uc=True)
+    
     try:
-        driver = Driver(uc=True)
         driver.get(URL)
         page_actions.wait_for_element(driver, selector="videoImage", by=By.ID)
         

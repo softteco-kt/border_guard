@@ -1,7 +1,7 @@
 # Custom
 data/
 downloaded_files/
-chromedriver.exe
+chromedriver*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
