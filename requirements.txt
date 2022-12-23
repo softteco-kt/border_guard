@@ -1,0 +1,2 @@
+selenium==4.7.2
+seleniumbase==4.9.11
