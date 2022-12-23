@@ -1,6 +1,6 @@
 ```sh
 # Setup project
-make setup
+source setup
 # Install poetry and dependencies
 make install
 # Run
