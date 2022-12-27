@@ -17,4 +17,3 @@ fi
 
 unzip *.zip -d .
 rm -i *.zip
-

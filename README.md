@@ -9,6 +9,6 @@ export URL=<URL HERE>
 source setup.sh
 # Install poetry and dependencies
 make install
-# Run
+# Provide URL in env variables and run
 make run
 ```
