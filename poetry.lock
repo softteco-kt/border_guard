@@ -1430,6 +1430,22 @@ trio = ">=0.11"
 wsproto = ">=0.14"
 
 [[package]]
+name = "undetected-chromedriver"
+version = "3.1.7"
+description = "('Selenium.webdriver.Chrome replacement with compatiblity for Brave, and other Chromium based browsers.', 'Not triggered by CloudFlare/Imperva/hCaptcha and such.', 'NOTE: results may vary due to many factors. No guarantees are given, except for ongoing efforts in understanding detection algorithms.')"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "undetected-chromedriver-3.1.7.tar.gz", hash = "sha256:ed159186828092635f2acc4ecdf02835e3d924947546e1aab9f71b3ba5a910b5"},
+]
+
+[package.dependencies]
+requests = "*"
+selenium = ">=4.0.0"
+websockets = "*"
+
+[[package]]
 name = "urllib3"
 version = "1.26.13"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -1635,4 +1651,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "0fb89cfffe9fb0b0374c411b6a7de519b91d3bcd60a47f2d27514dfbaced4861"
+content-hash = "0c3dbb3cc998c9c57f4770a751f20a17a36cb654f442bf5a9f8230333b79d80e"
