@@ -15,9 +15,11 @@ URL = os.environ.get('URL')
 
 def fetch_image():
 
-    import undetected_chromedriver as uc
     options = uc.ChromeOptions()
-    options.add_argument('--no-sandbox');options.add_argument("--headless=chrome");options.add_argument("--disable-gpu");options.add_argument("--disable-dev-shm-usage")
+    options.add_argument('--no-sandbox')
+    options.add_argument("--headless=chrome")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-dev-shm-usage")
     driver = uc.Chrome(options=options, driver_executable_path="./chromedriver")
 
     try:
@@ -40,9 +42,4 @@ def fetch_image():
 
 
 if __name__ == "__main__":
-    logging.info("Application startup...")
-    try:
-        while True:
-            fetch_image(); time.sleep(1200) # 20 min sleep
-    except KeyboardInterrupt:
-        logging.info(f'Exiting application...')
+    fetch_image()
