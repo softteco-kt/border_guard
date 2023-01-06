@@ -16,4 +16,4 @@ if [[ "$OSTYPE" =~ ^linux ]]; then
 fi
 
 unzip *.zip -d .
-rm -i *.zip
+rm *.zip

@@ -14,5 +14,7 @@ make run
 
 # For server setup 
 # add URL to cron.env ->
+make server-setup
+make chrome
 make run-cron
 ```
