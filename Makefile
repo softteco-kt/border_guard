@@ -11,4 +11,4 @@ server-setup:
 	sudo apt-get install google-chrome-stable ./google-chrome-stable_current_amd64.deb
 
 run-cron:
-	(crontab -l ; echo "* * * * * /root/.cache/pypoetry/virtualenvs/scraper-q0X35esw-py3.10/bin/python $(pwd)/test.py >> $(pwd)/logs.log 2>&1")| crontab -
+	(crontab -l ; cat cron.env ; echo "*/20 * * * * $(poetry run which python) $(pwd)/test.py >> $(pwd)/logs.log 2>&1")| crontab -

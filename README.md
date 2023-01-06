@@ -11,4 +11,8 @@ source setup.sh
 make install
 # Provide URL in env variables and run
 make run
+
+# For server setup 
+# add URL to cron.env ->
+make run-cron
 ```
