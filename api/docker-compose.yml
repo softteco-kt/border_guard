@@ -7,11 +7,11 @@ services:
             context: .
             dockerfile: Dockerfile
         container_name: app
-        command: [ "./entrypoint-local.sh" ]
+        command: ["./entrypoint-local.sh" ]
         networks:
             - app-net
-        depends_on:
-            - postgresdb
+        # depends_on:
+            # - postgresdb
         ports:
             - '8000:8000'
         environment:
@@ -21,23 +21,23 @@ services:
             - POSTGRES_HOST
             - POSTGRES_PORT
 
-    postgresdb:
-        container_name: postgres
-        image: postgres:15-alpine
-        networks:
-            - app-net
-        volumes: 
-            - sample_db:/var/lib/postgresql/data
-        ports:
-            - '5435:5432'
-        environment:
-            - POSTGRES_USERNAME
-            - POSTGRES_PASSWORD
-            - POSTGRES_DATABASE
+    # postgresdb:
+    #     container_name: postgres
+    #     image: postgres:15-alpine
+    #     networks:
+    #         - app-net
+    #     volumes: 
+    #         - sample_db:/var/lib/postgresql/data
+    #     ports:
+    #         - '5435:5432'
+    #     environment:
+    #         - POSTGRES_USERNAME
+    #         - POSTGRES_PASSWORD
+    #         - POSTGRES_DATABASE
 
 
-volumes:
-    sample_db:
+# volumes:
+#     sample_db:
 
 networks:
     app-net:
