@@ -1,45 +1,62 @@
-FROM python:3.9.0-alpine3.16
-
-WORKDIR /usr/src/app
+FROM python:3.10-slim-buster as base
 
 ENV \
-# Turns off writing .pyc files
+	# Turns off writing .pyc files
 	PYTHONDONTWRITEBYTECODE=1 \
-# Seems to speed things up
+	# Seems to speed things up
 	PYTHONUNBUFFERED=1 \
-# Default VENV usage
+	# Default VENV usage
 	PATH="/venv/bin:${PATH}" \
-	VIRTUAL_ENV="/venv"
+	VIRTUAL_ENV="/venv" \
+	# PIP configs
+	PIP_DEFAULT_TIMEOUT=100 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+	WORKDIR=/usr/src/app
+
+WORKDIR $WORKDIR
+
+# Create virtual env to store dependencies
+RUN python3 -m venv $VIRTUAL_ENV 
+# Project dependencies
+RUN apt-get update && apt-get -y install vim cron
 
 ### ---
 FROM base as builder
 
-ENV PIP_DEFAULT_TIMEOUT=100 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1
+RUN apt-get update && \ 
+	apt-get -y install wget unzip
 
-# Install poetry
-RUN pip3 install -U pip && \
-	pip3 install setuptools && \
-	pip3 install poetry
-
-# Create virtual env to store dependencies
-RUN python3 -m venv /venv 
-
-# Install root project
-COPY pyproject.toml poetry.lock ./
-RUN . /venv/bin/activate && poetry install --no-root --only main
-
-# Build wheels
-COPY . .
-RUN . /venv/bin/activate && poetry build && pip install dist/*.whl
+# Download Chrome and Chromedriver
+RUN	wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    wget https://chromedriver.storage.googleapis.com/108.0.5359.71/chromedriver_linux64.zip && \
+	unzip *.zip -d .
 
 ### ---
 FROM base as final
 
-RUN apk add --no-cache libffi libpq make
+ENV CHROME_EXE=google-chrome-stable_current_amd64.deb
 
-COPY --from=builder /venv /venv
-COPY --from=builder /usr/src/app .
+COPY --from=builder \
+	$WORKDIR/$CHROME_EXE \
+	$WORKDIR/chromedriver \
+	.
+COPY requirements.txt .
 
-CMD ['./entrypoint.sh']
+# Install google-chrome
+RUN apt-get -y install google-chrome-stable ./$CHROME_EXE && \
+    rm ./$CHROME_EXE
+
+RUN pip3 install -U pip && \
+	pip3 install setuptools && \
+	pip3 install -r requirements.txt
+
+COPY . .
+
+RUN mkdir data && touch logs.log && \
+	sh cron.sh > /etc/cron.d/crontab && \
+	chmod 0644 /etc/cron.d/crontab && \
+	/usr/bin/crontab /etc/cron.d/crontab
+
+# Run cron as main process
+CMD ["cron", "-f"]
