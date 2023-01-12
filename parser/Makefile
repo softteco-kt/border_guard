@@ -13,3 +13,16 @@ chrome:
 
 run-cron:
 	(crontab -l ; cat cron.env ; echo "*/20 * * * * $(poetry run which python) $(pwd)/main.py >> $(pwd)/logs.log 2>&1")| crontab -
+
+docker-stop: 
+	docker container stop parser 
+	
+docker: 
+	docker build . -t parser 
+
+docker-slim:
+	docker build -t parser -f slim.Dockerfile .
+
+docker-run:
+	docker run --rm -it -d --name parser parser 
+	docker exec -it parser sh
