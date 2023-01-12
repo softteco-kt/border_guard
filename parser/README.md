@@ -1,7 +1,7 @@
 ```sh
 # Setup project
 source setup.sh
-# Provide URL in env variables and run
+# export URL and run
 make run
 
 # For server setup 
