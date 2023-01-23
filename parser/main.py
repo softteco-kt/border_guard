@@ -8,6 +8,10 @@ import os
 
 import undetected_chromedriver as uc
 
+from send_msg import send_to_qu, logging
+
+from models import BorderCapture, init_db
+
 FORMAT = '%(asctime)s - %(levelname)s: %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO)
 
@@ -33,6 +37,16 @@ def fetch_image():
 
         assert img_name in os.listdir("./data/")
         logging.info(f'Successfuly fetched an image - {img_name}!')
+
+        model = BorderCapture.create(
+            image_path=file.name,
+        )
+        logging.info("Database record created.")
+
+        # ID is of type UUID, thus conversion req.
+        send_to_qu(str(model.id))
+        logging.info("Sent to queue!")
+
     except Exception as e:
         logging.error('->', exc_info=True); driver.quit(); time.sleep(3)
         logging.info(f'Fetch failed. Attempting retry...')
@@ -42,4 +56,6 @@ def fetch_image():
 
 
 if __name__ == "__main__":
+    init_db()
+
     fetch_image()
