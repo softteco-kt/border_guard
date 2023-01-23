@@ -1,15 +1,27 @@
-install:
-	poetry install
+SHELL := /bin/bash
 
 run:
-	poetry run python main.py
-
-server-setup:
-	apt install python3-poetry
-
-chrome:
-	wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-	sudo apt-get install google-chrome-stable ./google-chrome-stable_current_amd64.deb
+	source .venv/bin/activate && python3 main.py
 
 run-cron:
-	(crontab -l ; cat cron.env ; echo "*/20 * * * * $(poetry run which python) $(pwd)/main.py >> $(pwd)/logs.log 2>&1")| crontab -
+	(source cron.sh)| crontab -
+	echo "cron job set up successfully!"
+	crontab -l
+
+server-setup:
+	source setup.sh && \
+	wget --no-verbose -O /tmp/chrome.deb \
+		https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb && \
+		sudo apt-get update && \
+		sudo apt install -y --allow-downgrades /tmp/chrome.deb && \
+		rm /tmp/chrome.deb		
+
+docker: 
+	docker build . -t parser 
+
+docker-run:
+	docker run --rm -it -d --name parser parser 
+	docker exec -it parser sh
+
+docker-stop: 
+	docker container stop parser 

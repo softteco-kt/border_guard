@@ -1,20 +1,11 @@
 ```sh
-# Make sure to have poetry installed
-poetry --version
-
-# Export ENV variables
-export URL=<URL HERE>
-
 # Setup project
 source setup.sh
-# Install poetry and dependencies
-make install
-# Provide URL in env variables and run
+# export URL and run
 make run
 
 # For server setup 
-# add URL to cron.env ->
 make server-setup
-make chrome
+# To init cron job
 make run-cron
 ```
