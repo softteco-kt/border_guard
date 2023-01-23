@@ -5,14 +5,6 @@ import os, sys, logging, requests
 
 from .models import BorderCapture, database as database_connection
 
-
-RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST')
-RABBITMQ_PORT = os.environ.get('RABBITMQ_PORT')
-
-IMAGE_QUEUE = os.environ.get("IMAGE_QUEUE")
-IMAGE_EXCHANGE = os.environ.get("IMAGE_EXCHANGE")
-IMAGE_ROUTING_KEY = os.environ.get("IMAGE_ROUTING_KEY")
-
 FORMAT = '%(asctime)s - %(levelname)s: %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
 
@@ -37,28 +29,11 @@ class CustomConsumer(bootsteps.ConsumerStep):
         process_img.delay(body)
         message.ack()
 
-app = Celery(
-    'worker', 
-    backend='rpc://', 
-    broker=f'pyamqp://{RABBITMQ_HOST}:{RABBITMQ_PORT}',
-)
+app = Celery('worker')
 
 # Add a proxy class to celery application
 app.steps['consumer'].add(CustomConsumer)
 
-# Route messages from specified source to specific task
-app.conf.task_routes = {
-        'worker.main.process_img': {
-            'queue': IMAGE_QUEUE, 
-            'exchange':IMAGE_EXCHANGE, 
-            'routing_key':IMAGE_ROUTING_KEY
-        },
-    }
-
-# Declare Queues for celery to listen to
-app.conf.task_queues = (
-    QUEUE,
-)
 
 @app.task(acks_late=True)
 def process_img(image_id):
