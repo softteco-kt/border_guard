@@ -1,11 +1,26 @@
-from fastapi import FastAPI, File, UploadFile, Depends
+from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, Body
+from pydantic import BaseModel
 import torch
 
 from PIL import Image
 from io import BytesIO
 from functools import lru_cache
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @lru_cache
 def get_model():
@@ -16,15 +31,31 @@ def startup():
     get_model()
 
 
-from pydantic import BaseModel
 class CarsMetaData(BaseModel):
     amount: int
 
-@app.post("/process", response_model=CarsMetaData)
-async def count_cars_in_image(image: UploadFile = File(), model = Depends(get_model)):
+
+@app.post("/cars_on_border", response_model=CarsMetaData)
+async def count_cars_in_image(
+        image_url: str = Body(None),
+        image_binary: UploadFile = File(None), 
+        model = Depends(get_model)
+    ):
     # decode + process image with PIL
-    result = model(Image.open(BytesIO(await image.read())))
-    return count_cars(result,model)
+    if not any([image_url, image_binary]):
+        raise HTTPException(
+            status_code = 422, 
+            detail = {
+                "field error":"At least one of the values should be provided",
+            }
+        )
+
+    if image_binary:
+        result=1
+        result = model(Image.open(BytesIO(await body.image_binary.read())))
+        return count_cars(result,model)
+    else:
+        raise HTTPException(status_code=501, detail={"error":"Not Implemented."})
 
 def count_cars(results, model):
     ''' Helper function for process_home_form()'''

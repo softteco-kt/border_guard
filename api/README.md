@@ -1,14 +1,19 @@
-Setup with python venv
+## Image processing API
+
+Has a single endpoint with following optional input params:
+- image_url: _str_ [Optional]
+- image_binary: _binary_ [Optional]
+
+
+Utility commands:
 
 ```sh
-python -m venv .env
-source /.env/scripts/activate
-```
-Download dependencies:
-```
+#Download dependencies:
 make deps
-```
-Start server
-```
-make run
+
+#Start docker
+make up
+
+#Tear down
+make down
 ```
