@@ -74,12 +74,17 @@ def process_img(image_id):
             data={'image_url':model.image_path},
             # timeout for (connection , read)
             timeout=(5,30))
-        response_amount = response.json()['amount']
 
-        if response.status_code != 200 and isinstance(response_amount, int):
-            logging.info("[task] API FAILED TO PROCESS")
-            logging.info(response)
-            return 0
+        if response.status_code != 200:
+            # Temporary exception
+            raise Exception
+
+        try:
+            response_amount = response.json()['amount']
+        except:
+            logging.error("[task] API wrong response")
+            # temprorary exception
+            raise Exception
         
         upd = model.update(
             number_of_cars=response_amount,
