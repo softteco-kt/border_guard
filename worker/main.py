@@ -4,16 +4,11 @@ from kombu import Consumer, Exchange, Queue
 import os, sys, logging, requests
 
 from .models import BorderCapture, database as database_connection
+from .celeryconfig import QUEUE
 
 FORMAT = '%(asctime)s - %(levelname)s: %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
 
-# Declare Kombu Queue
-QUEUE = Queue(
-        IMAGE_QUEUE, 
-        Exchange(IMAGE_EXCHANGE, type='topic', durable=False), 
-        routing_key=IMAGE_ROUTING_KEY
-    )
 
 class CustomConsumer(bootsteps.ConsumerStep):
     """ A proxy, routes messages directly from Message Queue to celery tasks"""
@@ -30,7 +25,8 @@ class CustomConsumer(bootsteps.ConsumerStep):
         message.ack()
 
 app = Celery('worker')
-
+# Celery configuration
+app.config_from_object('celeryconfig')
 # Add a proxy class to celery application
 app.steps['consumer'].add(CustomConsumer)
 
@@ -46,9 +42,10 @@ def process_img(image_id):
         # Model image_path is a url to static file
         response = requests.post(
             "http://api:8000/cars_on_border", 
-            data={'image_url':model.image_path},
+            data={"image_url":model.image_path},
             # timeout for (connection , read)
-            timeout=(5,30))
+            timeout=(5,30)
+        )
 
         if response.status_code != 200:
             # Temporary exception

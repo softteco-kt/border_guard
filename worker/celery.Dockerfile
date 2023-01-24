@@ -36,5 +36,8 @@ FROM base as final
 COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 
 COPY . ./worker
+COPY celeryconfig.py .
+
+RUN chmod +x ./worker/wait-for
 
 CMD celery -A worker.main worker -l INFO
