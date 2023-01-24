@@ -16,7 +16,7 @@ QUEUE = Queue(
         routing_key=IMAGE_ROUTING_KEY
     )
 
-BROKER_URL=f'pyamqp://{RABBITMQ_HOST}:{RABBITMQ_PORT}',
+broker_url=f'pyamqp://{RABBITMQ_HOST}:{RABBITMQ_PORT}',
 
 # List of modules to import when the Celery worker starts.
 IMPORTS = ('worker.main',)
@@ -31,6 +31,6 @@ TASK_ROUTES = {
     }
 
 # Declare Queues for celery to listen to
-CELERY_QUEUES = (
+task_queues = (
     QUEUE,
 )
