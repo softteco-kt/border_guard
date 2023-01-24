@@ -1,6 +1,6 @@
 FROM python:3.10-slim-buster as base
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src/api
 
 ENV \
 	# Turns off writing .pyc files
@@ -26,6 +26,8 @@ RUN	pip3 install setuptools && \
 
 COPY . .
 
-RUN chmod +x entrypoint-local.sh
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8000
+
+CMD ["sh", "./docker-entrypoint.sh"]
