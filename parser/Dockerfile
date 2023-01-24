@@ -1,7 +1,7 @@
 FROM python:3.10-slim-buster as base
 
 ENV \
-	WORKDIR=/usr/src/app \
+	WORKDIR=/usr/src/parser \
 	# Turns off writing .pyc files
 	PYTHONDONTWRITEBYTECODE=1 \
 	# Seems to speed things up
@@ -30,7 +30,7 @@ RUN apt-get update && \
 FROM base as builder
 
 RUN apt-get update && \
-	apt-get -y install wget unzip
+	apt-get -y install wget unzip libpq-dev gcc
 # Download Chrome and Chromedriver
 RUN wget \
 		--no-verbose \
@@ -41,26 +41,30 @@ RUN wget \
 		https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip && \
 	unzip $CHROMEDRIVER_ZIP -d .
 
-### ---
-FROM base as final
-
-# Install google-chrome
-COPY --from=builder $WORKDIR/$CHROME_EXE $WORKDIR/chromedriver .
-
-RUN apt install -y ./$CHROME_EXE && \
-	rm ./$CHROME_EXE
-
 COPY requirements.txt .
 RUN pip3 install -U pip && \
 	pip3 install setuptools && \
 	pip3 install -r requirements.txt
 
+### ---
+FROM base as final
+
+# Install google-chrome
+COPY --from=builder $WORKDIR/$CHROME_EXE $WORKDIR/chromedriver ./
+COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
+
+RUN apt install -y ./$CHROME_EXE && \
+	rm ./$CHROME_EXE
+
 COPY . .
 
-RUN mkdir data && touch logs.log && \
+RUN chmod +x ./wait-for &&\
+	mkdir data && touch logs.log && \
 	sh cron.sh > /etc/cron.d/crontab && \
 	chmod 0644 /etc/cron.d/crontab && \
 	/usr/bin/crontab /etc/cron.d/crontab
+
+RUN apt-get install -y netcat
 
 # Run cron as main process
 CMD ["cron", "-f"]
