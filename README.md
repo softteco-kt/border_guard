@@ -7,9 +7,6 @@ This is a sample application built with microservice architecture with 4 standal
 - Message Queue
 - Worker
 
-
-_Note: The microservices are intentionally made as simple as possible to showcase how the entirety of an application works as a system._ 
-
 ---
 ### Application workflow:
 
@@ -21,6 +18,9 @@ _Note: The microservices are intentionally made as simple as possible to showcas
 
 
 Overall workflow  | `Parser` --> `RabbitMQ` --> `Celery` --> `API`
+
+Note:
+- API and Parser microservices share the same volume at /usr/src/api and /usr/src/parser respectively
 
 ---
 Start the project with:

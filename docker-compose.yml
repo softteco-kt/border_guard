@@ -34,7 +34,7 @@ services:
             context: ./parser
             dockerfile: Dockerfile
         container_name: parser
-        command: sh -c "./wait-for postgresdb:5432 && ./wait-for rabbitmq:5672 -- python3 main.py"
+        command: sh -c "./wait-for postgresdb:5432 && ./wait-for rabbitmq:5672 && cron -f"
         restart: always
         depends_on:
             - rabbitmq
@@ -55,8 +55,7 @@ services:
         volumes: 
             - base:/usr/src/app
 
-
-    celery:
+    worker:
         build:
             context: ./worker
             dockerfile: celery.Dockerfile
