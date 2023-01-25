@@ -1,5 +1,5 @@
 from celery import Celery
 
-app = Celery('worker')
+app = Celery("worker")
 # Celery configuration
-app.config_from_object('celeryconfig')
+app.config_from_object("celeryconfig")
