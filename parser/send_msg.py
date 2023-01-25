@@ -4,11 +4,11 @@ import sys
 
 import pika
 
-RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST")
-RABBITMQ_PORT = os.environ.get("RABBITMQ_PORT")
-IMAGE_EXCHANGE = os.environ.get("IMAGE_EXCHANGE")
-IMAGE_ROUTING_KEY = os.environ.get("IMAGE_ROUTING_KEY")
-Q = os.environ.get("IMAGE_QUEUE")
+RABBITMQ_HOST = os.environ["RABBITMQ_HOST"]
+RABBITMQ_PORT = os.environ["RABBITMQ_PORT"]
+IMAGE_EXCHANGE = os.environ["IMAGE_EXCHANGE"]
+IMAGE_ROUTING_KEY = os.environ["IMAGE_ROUTING_KEY"]
+Q = os.environ["IMAGE_QUEUE"]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

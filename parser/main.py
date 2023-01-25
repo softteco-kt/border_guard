@@ -10,7 +10,7 @@ from seleniumbase import page_actions
 from models import BorderCapture, database
 from send_msg import logger, send_to_qu
 
-URL = os.environ.get("URL")
+URL = os.environ["URL"]
 
 RETRY_ATTEMTPS = 5
 

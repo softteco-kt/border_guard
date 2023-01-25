@@ -4,11 +4,11 @@ import uuid
 
 import peewee as pw
 
-POSTGRES_DATABASE = os.environ.get("POSTGRES_DATABASE")
-POSTGRES_USERNAME = os.environ.get("POSTGRES_USERNAME")
-POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
-POSTGRES_HOST = os.environ.get("POSTGRES_HOST")
-POSTGRES_PORT = os.environ.get("POSTGRES_PORT")
+POSTGRES_DATABASE = os.environ["POSTGRES_DATABASE"]
+POSTGRES_USERNAME = os.environ["POSTGRES_USERNAME"]
+POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
+POSTGRES_HOST = os.environ["POSTGRES_HOST"]
+POSTGRES_PORT = os.environ["POSTGRES_PORT"]
 
 # Connect to a Postgres database.
 database = pw.PostgresqlDatabase(
