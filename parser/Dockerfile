@@ -24,7 +24,7 @@ WORKDIR $WORKDIR
 RUN python3 -m venv $VIRTUAL_ENV 
 # Project dependencies
 RUN apt-get update && \
-	apt-get -y install vim cron
+	apt-get -y install vim cron libpq5 netcat
 
 ### ---
 FROM base as builder
@@ -60,11 +60,10 @@ COPY . .
 
 RUN chmod +x ./wait-for &&\
 	mkdir data && touch logs.log && \
-	sh cron.sh > /etc/cron.d/crontab && \
+	sh setup_cron.sh &&\
+	crontab -l > /etc/cron.d/crontab && \
 	chmod 0644 /etc/cron.d/crontab && \
 	/usr/bin/crontab /etc/cron.d/crontab
-
-RUN apt-get install -y netcat
 
 # Run cron as main process
 CMD ["cron", "-f"]

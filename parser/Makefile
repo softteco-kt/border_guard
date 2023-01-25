@@ -4,7 +4,7 @@ run:
 	source .venv/bin/activate && python3 main.py
 
 run-cron:
-	(source cron.sh)| crontab -
+	source setup_cron.sh
 	echo "cron job set up successfully!"
 	crontab -l
 
@@ -21,7 +21,7 @@ docker:
 
 docker-run:
 	docker run --rm -it -d --name parser parser 
-	docker exec -it parser sh
+	docker exec -it parser bash
 
 docker-stop: 
-	docker container stop parser 
+	docker container stop parser
