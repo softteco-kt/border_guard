@@ -53,8 +53,7 @@ async def count_cars_in_image(
         )
 
     if image_binary:
-        result = 1
-        result = model(Image.open(BytesIO(await body.image_binary.read())))
+        result = model(Image.open(BytesIO(await image_binary.read())))
         return count_cars(result, model)
     else:
         raise HTTPException(status_code=501, detail={"error": "Not Implemented."})
