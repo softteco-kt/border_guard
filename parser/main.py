@@ -1,17 +1,14 @@
+import datetime
+import os
+import sys
+import time
+
+import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from seleniumbase import page_actions
 
-import datetime
-import time
-import logging
-import os
-
-import undetected_chromedriver as uc
-
-from send_msg import send_to_qu, logger
-
-from models import BorderCapture, init_db, database
-import sys
+from models import BorderCapture, database
+from send_msg import logger, send_to_qu
 
 URL = os.environ.get("URL")
 

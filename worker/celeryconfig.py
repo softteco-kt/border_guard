@@ -1,10 +1,8 @@
-import os, sys, logging, requests
-from kombu import Exchange, Queue
+import logging
+import sys
 
-from worker.env import *
 from worker.consumer import QUEUE
-
-from celery import Celery
+from worker.env import *
 
 FORMAT = "%(asctime)s - %(levelname)s: %(message)s"
 logging.basicConfig(

@@ -1,12 +1,11 @@
-from kombu import Consumer, Exchange, Queue
-
 import logging
 
 from celery import bootsteps
+from kombu import Consumer, Exchange, Queue
 
-from worker.tasks import process_img
 from worker.env import *
 from worker.main import app
+from worker.tasks import process_img
 
 # Declare Kombu Queue
 QUEUE = Queue(

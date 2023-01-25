@@ -1,6 +1,8 @@
-from models import BorderCapture, database as database_connection
+import logging
+import requests
 
-import logging, requests
+from models import BorderCapture
+from models import database as database_connection
 
 from worker.main import app
 

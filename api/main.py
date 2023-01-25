@@ -1,12 +1,12 @@
-from fastapi import FastAPI, File, UploadFile, Depends, HTTPException, Body
-from pydantic import BaseModel
+from functools import lru_cache
+from io import BytesIO
+
 import torch
 
-from PIL import Image
-from io import BytesIO
-from functools import lru_cache
-
+from fastapi import Body, Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from PIL import Image
+from pydantic import BaseModel
 
 app = FastAPI()
 

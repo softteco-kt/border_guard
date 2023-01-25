@@ -1,4 +1,8 @@
-import pika, os, logging, sys
+import logging
+import os
+import sys
+
+import pika
 
 RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST")
 RABBITMQ_PORT = os.environ.get("RABBITMQ_PORT")

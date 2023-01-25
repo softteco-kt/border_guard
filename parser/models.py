@@ -1,5 +1,6 @@
-import os, datetime, uuid
-
+import datetime
+import os
+import uuid
 import peewee as pw
 
 POSTGRES_DATABASE = os.environ["POSTGRES_DATABASE"]
