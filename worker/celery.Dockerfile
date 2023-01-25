@@ -1,6 +1,6 @@
 FROM python:3.11.0-alpine3.16 as base
 
-WORKDIR /usr/src
+WORKDIR /usr/src/app
 
 ENV \
 # Turns off writing .pyc files
@@ -35,9 +35,8 @@ FROM base as final
 
 COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 
-COPY . ./worker
-COPY celeryconfig.py .
+COPY . .
 
-RUN chmod +x ./worker/wait-for
+RUN chmod +x ./wait-for
 
 CMD celery -A worker.main worker -l INFO

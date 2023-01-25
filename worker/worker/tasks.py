@@ -1,35 +1,8 @@
-from celery import Celery, bootsteps
-from kombu import Consumer, Exchange, Queue
+from models import BorderCapture, database as database_connection
 
-import os, sys, logging, requests
+import logging, requests
 
-from .models import BorderCapture, database as database_connection
-from .celeryconfig import QUEUE
-
-FORMAT = '%(asctime)s - %(levelname)s: %(message)s'
-logging.basicConfig(format=FORMAT, level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
-
-
-class CustomConsumer(bootsteps.ConsumerStep):
-    """ A proxy, routes messages directly from Message Queue to celery tasks"""
-
-    def get_consumers(self, channel):
-        return [Consumer(channel,
-                         queues=[QUEUE],
-                         callbacks=[self.handle_message]
-                         )]
-
-    def handle_message(self, body, message):
-        logging.info(f'[consumer] Received {body}')
-        process_img.delay(body)
-        message.ack()
-
-app = Celery('worker')
-# Celery configuration
-app.config_from_object('celeryconfig')
-# Add a proxy class to celery application
-app.steps['consumer'].add(CustomConsumer)
-
+from worker.main import app
 
 @app.task(acks_late=True)
 def process_img(image_id):

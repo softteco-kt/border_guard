@@ -34,7 +34,12 @@ services:
             context: ./parser
             dockerfile: Dockerfile
         container_name: parser
-        command: sh -c "./wait-for postgresdb:5432 && ./wait-for rabbitmq:5672 && cron -f"
+        command: >
+            sh -c " \
+                ./wait-for postgresdb:5432 && \
+                ./wait-for rabbitmq:5672 && \
+                python models.py && \
+                cron -f"
         restart: always
         depends_on:
             - rabbitmq
@@ -61,10 +66,10 @@ services:
             dockerfile: celery.Dockerfile
         container_name: worker
         command: >
-            sh -c "
-                ./worker/wait-for rabbitmq:5672 $$ 
-                ./worker/wait-for postgresdb:5432 $$  
-                celery -A worker.main worker -l INFO -c 1 -E"
+            sh -c " \
+                ./wait-for rabbitmq:5672 && \
+                ./wait-for postgresdb:5432 && \ 
+                celery -A worker.main worker"
         restart: always
         networks:
             - basenet
