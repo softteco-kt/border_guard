@@ -59,11 +59,6 @@ RUN apt install -y ./$CHROME_EXE && \
 COPY . .
 
 RUN chmod +x ./wait-for &&\
-	mkdir data && touch logs.log && \
-	sh setup_cron.sh &&\
-	crontab -l > /etc/cron.d/crontab && \
-	chmod 0644 /etc/cron.d/crontab && \
-	/usr/bin/crontab /etc/cron.d/crontab
+	mkdir data && touch logs.log
 
-# Run cron as main process
-CMD ["cron", "-f"]
+CMD ["sh", "./docker-entrypoint.sh"]

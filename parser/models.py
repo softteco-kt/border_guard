@@ -2,11 +2,11 @@ import os, datetime, uuid
 
 import peewee as pw
 
-POSTGRES_DATABASE = os.environ.get('POSTGRES_DATABASE')
-POSTGRES_USERNAME = os.environ.get('POSTGRES_USERNAME')
-POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
-POSTGRES_HOST = os.environ.get('POSTGRES_HOST')
-POSTGRES_PORT = os.environ.get('POSTGRES_PORT')
+POSTGRES_DATABASE = os.environ['POSTGRES_DATABASE']
+POSTGRES_USERNAME = os.environ['POSTGRES_USERNAME']
+POSTGRES_PASSWORD = os.environ['POSTGRES_PASSWORD']
+POSTGRES_HOST = os.environ['POSTGRES_HOST']
+POSTGRES_PORT = os.environ['POSTGRES_PORT']
 
 # Connect to a Postgres database.
 database = pw.PostgresqlDatabase(
@@ -15,6 +15,7 @@ database = pw.PostgresqlDatabase(
     port=POSTGRES_PORT,
     user=POSTGRES_USERNAME, 
     password=POSTGRES_PASSWORD,
+    autoconnect=False
 )
 
 class BaseModel(pw.Model):
@@ -49,8 +50,11 @@ class AxisAlignedBoundingBoxNorm(BaseModel):
             ]
 
 def init_db():
-    database.create_tables([BorderCapture, AxisAlignedBoundingBoxNorm], safe=True)
-
+    database.connect()
+    assert database.is_connection_usable()
     
+    database.create_tables([BorderCapture, AxisAlignedBoundingBoxNorm], safe=True)
+    database.close()
+
 if __name__ == "__main__":    
     init_db()

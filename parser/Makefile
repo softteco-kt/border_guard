@@ -20,7 +20,7 @@ docker:
 	docker build . -t parser 
 
 docker-run:
-	docker run --rm -it -d --name parser parser 
+	docker run --rm -it -d --name parser --env-file=../.env.compose parser 
 	docker exec -it parser bash
 
 docker-stop: 

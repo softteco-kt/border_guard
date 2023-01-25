@@ -8,16 +8,22 @@ import os
 
 import undetected_chromedriver as uc
 
-from send_msg import send_to_qu, logging
+from send_msg import send_to_qu, logger
 
-from models import BorderCapture, init_db
-
-FORMAT = '%(asctime)s - %(levelname)s: %(message)s'
-logging.basicConfig(format=FORMAT, level=logging.INFO)
+from models import BorderCapture, init_db, database
+import sys
 
 URL = os.environ.get('URL')
 
-def fetch_image():
+RETRY_ATTEMTPS = 5
+
+def fetch_image(retries = RETRY_ATTEMTPS):
+
+    try:
+        # Checking database connection
+        database.connect()
+    except:
+        raise Exception("Database connection can not be established.")
 
     options = uc.ChromeOptions()
     options.add_argument('--no-sandbox')
@@ -36,26 +42,28 @@ def fetch_image():
         image.screenshot("./data/" + img_name)
 
         assert img_name in os.listdir("./data/")
-        logging.info(f'Successfuly fetched an image - {img_name}!')
+        logger.info(f'Successfuly fetched an image - {img_name}!')
 
-        model = BorderCapture.create(
-            image_path=file.name,
-        )
-        logging.info("Database record created.")
-
+        with database:
+            model = BorderCapture.create(
+                image_path=img_name,
+            )
+        
         # ID is of type UUID, thus conversion req.
         send_to_qu(str(model.id))
-        logging.info("Sent to queue!")
+        logger.info("Sent to queue!")
 
     except Exception as e:
-        logging.error('->', exc_info=True); driver.quit(); time.sleep(3)
-        logging.info(f'Fetch failed. Attempting retry...')
-        fetch_image()
+        
+        if retries == 0:
+            logger.exception(e); sys.exit(1)
+
+        driver.quit(); time.sleep(3)
+        logger.error(f'Fetch failed. Attempting retry...')
+        fetch_image(retries=retries - 1)
 
     driver.quit()
 
 
 if __name__ == "__main__":
-    init_db()
-
     fetch_image()
