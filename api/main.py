@@ -7,9 +7,10 @@ import torch
 from fastapi import Body, Depends, FastAPI, File, HTTPException, UploadFile, Query
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, ImageOps
-from pydantic import BaseModel
 
-from db import database, BorderCapture
+from db import database, BorderCapture, AxisAlignedBoundingBoxNorm
+
+from schemas import BorderCaptureOut, CarsMetaData
 
 app = FastAPI()
 
@@ -24,7 +25,6 @@ app.add_middleware(
 )
 
 from enum import Enum
-
 
 class Yolov5(str, Enum):
     nano = "yolov5n"
@@ -43,28 +43,18 @@ def get_model(model_size: Yolov5 = Yolov5.nano):
 
 @app.on_event("startup")
 def startup():
+    # Create DB if not exists
+    database.connect()
+    database.create_tables([BorderCapture, AxisAlignedBoundingBoxNorm])
+    database.close()
+
     # Download and cache Yolov5 model variants
     for i in Yolov5:
-        get_model(i)
+        # get_model(i)
+        pass
 
 
-class CarsMetaData(BaseModel):
-    amount: int
-
-
-class BorderCaptureOut(BaseModel):
-    id: str
-    created_at: int
-    image_path: str
-    number_of_cars: int
-    processed: bool | None = None
-    processed_at: int | None = None
-
-    class Meta:
-        orm_mode = True
-
-
-@app.get("/cats_on_border", response_model=list[BorderCaptureOut])
+@app.get("/cars_on_border", response_model=list[BorderCaptureOut])
 async def get_db_information(
     processed: bool | None = None,
     start_timestamp: int | None = None,
@@ -74,16 +64,14 @@ async def get_db_information(
         db_model = BorderCapture.select()
 
         if start_timestamp:
-            db_model.where(BorderCapture.processed_at >= start_timestamp)
+            db_model = db_model.where(BorderCapture.processed_at >= start_timestamp)
         if end_timestamp:
-            db_model.where(BorderCapture.processed_at <= end_timestamp)
+            db_model = db_model.where(BorderCapture.processed_at <= end_timestamp)
         if processed:
-            db_model.where(BorderCapture.processed == processed)
+            db_model = db_model.where(BorderCapture.processed == processed)
 
-        db_model.order_by(BorderCapture.created_at.asc())
-        db_model.execute()
-
-    return db_model
+        db_model = db_model.order_by(BorderCapture.created_at.asc())
+        return list(db_model)
 
 
 @app.post("/cars_on_border", response_model=CarsMetaData)
@@ -115,7 +103,7 @@ async def count_cars_in_image(
             response = requests.get(image_url)
             image_to_process = Image.open(BytesIO(response.content))
         elif image_path:
-            image_to_process = Image.open(image_url, "r")
+            image_to_process = Image.open(image_path, "r")
     except:
         raise HTTPException(status_code=404, detail={"ValueError": "Image Not Found."})
 
