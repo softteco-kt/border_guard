@@ -9,8 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, ImageOps
 from pydantic import BaseModel
 
-
-from models import database, BorderCapture
+from db import database, BorderCapture
 
 app = FastAPI()
 
