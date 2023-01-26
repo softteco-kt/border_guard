@@ -1,19 +1,30 @@
 import logging
 import requests
 import datetime
+import sys
 
 from models import BorderCapture
 from models import database as database_connection
 
 from worker.main import app
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    "%(asctime)s | %(levelname)s | %(message)s", "%m-%d-%Y %H:%M:%S"
+)
+
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.INFO)
+stdout_handler.setFormatter(formatter)
+
+logger.addHandler(stdout_handler)
 
 @app.task(acks_late=True)
 def process_img(image_id):
     # init connection and automatically close when task is completed
     with database_connection:
 
-        logging.info("[task] Received. ID: %r" % image_id)
         model = BorderCapture.get(id=image_id)
 
         # Model image_path is a url to static file
@@ -33,7 +44,7 @@ def process_img(image_id):
         try:
             response_amount = response.json()["amount"]
         except:
-            logging.error("[task] API wrong response")
+            logger.error("[task] API wrong response")
             # temprorary exception
             raise Exception("Key error: [amount] was not found in Response")
 
@@ -43,4 +54,4 @@ def process_img(image_id):
             processed=True,
         )
         upd.execute()
-        logging.info("[task] DB updated. ID: %r" % model.id)
+        logger.info("[task] DB updated. ID: %r" % model.id)
