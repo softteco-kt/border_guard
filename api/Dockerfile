@@ -14,8 +14,6 @@ ENV \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
 
-COPY ./requirements.lock.txt ./ 
-
 # Create virtual env to store dependencies
 RUN python3 -m venv $VIRTUAL_ENV
 
@@ -33,7 +31,8 @@ RUN apt-get update && \
 COPY requirements.txt .
 RUN pip3 install -U pip && \
 	pip3 install setuptools && \
-	pip3 install -r requirements.txt \
+	pip3 install -r requirements.txt && \
+	pip3 install torch torchvision torchaudio \
 	--extra-index-url https://download.pytorch.org/whl/cpu
 
 FROM builder as final
