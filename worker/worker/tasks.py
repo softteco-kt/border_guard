@@ -19,7 +19,9 @@ def process_img(image_id):
         # Model image_path is a url to static file
         response = requests.post(
             "http://api:8000/cars_on_border",
-            data={"image_url": model.image_path},
+            # Use the biggest YOLO model
+            params={"model_size": "yolov5x"},
+            data={"image_path": model.image_path},
             # timeout for (connection , read)
             timeout=(5, 30),
         )

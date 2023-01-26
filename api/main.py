@@ -1,16 +1,14 @@
 from functools import lru_cache
 from io import BytesIO
 
+import requests
 import torch
-import cv2
-import numpy as np
 
 from fastapi import Body, Depends, FastAPI, File, HTTPException, UploadFile, Query
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, ImageOps
 from pydantic import BaseModel
 
-from image_processing.night_illumination import dehaze
 
 app = FastAPI()
 
@@ -56,15 +54,21 @@ class CarsMetaData(BaseModel):
 @app.post("/cars_on_border", response_model=CarsMetaData)
 async def count_cars_in_image(
     image_url: str = Body(None),
+    image_path: str = Body(None),
     image_binary: UploadFile = File(None),
     apply_grayscale: bool = False,
     model=Depends(get_model),
 ):
-    if not any([image_url, image_binary]):
+    if not any([image_url, image_binary, image_path]):
         raise HTTPException(
             status_code=422,
             detail={
                 "field error": "At least one of the values should be provided",
+                "values": {
+                    "image_url": image_url,
+                    "image_path": image_path,
+                    "image_binary": image_binary,
+                },
             },
         )
 
@@ -73,6 +77,9 @@ async def count_cars_in_image(
         if image_binary:
             image_to_process = Image.open(BytesIO(await image_binary.read()))
         elif image_url:
+            response = requests.get(image_url)
+            image_to_process = Image.open(BytesIO(response.content))
+        elif image_path:
             image_to_process = Image.open(image_url, "r")
     except:
         raise HTTPException(status_code=404, detail={"ValueError": "Image Not Found."})
