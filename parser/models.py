@@ -32,6 +32,7 @@ class BorderCapture(BaseModel):
     number_of_cars = pw.IntegerField(null=True)
     image_path = pw.CharField(unique=True)
     processed = pw.BooleanField(default=False)
+    processed_at = pw.TimestampField(default=datetime.datetime.now().timestamp)
 
 
 # one-to-many bounding boxes to border image instances, can have multiple bounding boxes

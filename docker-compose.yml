@@ -58,7 +58,7 @@ services:
             - RABBITMQ_PORT
             - FETCH_INTERVAL
         volumes: 
-            - base:/usr/src/app
+            - shared-vol:/usr/src/parser/data
 
     worker:
         build:
@@ -114,11 +114,11 @@ services:
         ports:
             - '8000:8000'
         volumes: 
-            - base:/usr/src/app
+            - shared-vol:/usr/src/parser/data
 
 volumes:
     pgdata:
-    base:
+    shared-vol:
 
 networks:
     basenet:

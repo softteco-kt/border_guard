@@ -44,7 +44,7 @@ def fetch_image(retries=RETRY_ATTEMTPS):
 
         with database:
             model = BorderCapture.create(
-                image_path=img_name,
+                image_path=os.getcwd() + "/data/" + img_name,
             )
 
         # ID is of type UUID, thus conversion req.
