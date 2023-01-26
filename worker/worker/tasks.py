@@ -1,5 +1,6 @@
 import logging
 import requests
+import datetime
 
 from models import BorderCapture
 from models import database as database_connection
@@ -34,6 +35,10 @@ def process_img(image_id):
             # temprorary exception
             raise Exception("Key error: [amount] was not found in Response")
 
-        upd = model.update(number_of_cars=response_amount, processed=True)
+        upd = model.update(
+            number_of_cars=response_amount,
+            processed_at=datetime.datetime.utcnow().timestamp(),
+            processed=True,
+        )
         upd.execute()
         logging.info("[task] DB updated. ID: %r" % model.id)
