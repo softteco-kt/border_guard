@@ -25,14 +25,14 @@ def process_img(image_id):
 
         if response.status_code != 200:
             # Temporary exception
-            raise Exception
+            raise Exception("Non 200 API Response")
 
         try:
             response_amount = response.json()["amount"]
         except:
             logging.error("[task] API wrong response")
             # temprorary exception
-            raise Exception
+            raise Exception("Key error: [amount] was not found in Response")
 
         upd = model.update(number_of_cars=response_amount, processed=True)
         upd.execute()
