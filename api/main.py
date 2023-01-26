@@ -54,7 +54,7 @@ def startup():
         pass
 
 
-@app.get("/cats_on_border", response_model=list[BorderCaptureOut])
+@app.get("/cars_on_border", response_model=list[BorderCaptureOut])
 async def get_db_information(
     processed: bool | None = None,
     start_timestamp: int | None = None,
