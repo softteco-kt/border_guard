@@ -10,6 +10,8 @@ from PIL import Image, ImageOps
 from pydantic import BaseModel
 
 
+from models import database, BorderCapture
+
 app = FastAPI()
 
 origins = ["*"]
@@ -49,6 +51,40 @@ def startup():
 
 class CarsMetaData(BaseModel):
     amount: int
+
+
+class BorderCaptureOut(BaseModel):
+    id: str
+    created_at: int
+    image_path: str
+    number_of_cars: int
+    processed: bool | None = None
+    processed_at: int | None = None
+
+    class Meta:
+        orm_mode = True
+
+
+@app.get("/cats_on_border", response_model=list[BorderCaptureOut])
+async def get_db_information(
+    processed: bool | None = None,
+    start_timestamp: int | None = None,
+    end_timestamp: int | None = None,
+):
+    with database:
+        db_model = BorderCapture.select()
+
+        if start_timestamp:
+            db_model.where(BorderCapture.processed_at >= start_timestamp)
+        if end_timestamp:
+            db_model.where(BorderCapture.processed_at <= end_timestamp)
+        if processed:
+            db_model.where(BorderCapture.processed == processed)
+
+        db_model.order_by(BorderCapture.created_at.asc())
+        db_model.execute()
+
+    return db_model
 
 
 @app.post("/cars_on_border", response_model=CarsMetaData)

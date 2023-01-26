@@ -19,10 +19,24 @@ COPY ./requirements.lock.txt ./
 # Create virtual env to store dependencies
 RUN python3 -m venv $VIRTUAL_ENV
 
-# Install deps
-RUN	pip3 install setuptools && \
-	pip3 install -r requirements.lock.txt \ 
+# Project dependencies
+RUN apt-get update && \
+	apt-get -y install libpq5
+
+### ---
+FROM base as builder
+
+# Dependencies for psycopg2
+RUN apt-get update && \
+	apt-get -y install libpq-dev gcc
+
+COPY requirements.txt .
+RUN pip3 install -U pip && \
+	pip3 install setuptools && \
+	pip3 install -r requirements.txt \
 	--extra-index-url https://download.pytorch.org/whl/cpu
+
+FROM builder as final
 
 COPY . .
 

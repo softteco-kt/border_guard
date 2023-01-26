@@ -3,6 +3,8 @@ fastapi
 uvicorn
 python-multipart
 requests
+peewee==3.15.4
+psycopg2==2.9.5
 
 # YOLOv5 dependencies
 psutil  # system resources
