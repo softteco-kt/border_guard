@@ -20,6 +20,7 @@ stdout_handler.setFormatter(formatter)
 
 logger.addHandler(stdout_handler)
 
+
 @app.task(acks_late=True)
 def process_img(image_id):
     # init connection and automatically close when task is completed
@@ -48,10 +49,11 @@ def process_img(image_id):
             # temprorary exception
             raise Exception("Key error: [amount] was not found in Response")
 
-        upd = model.update(
+        upd = BorderCapture.update(
             number_of_cars=response_amount,
             processed_at=datetime.datetime.utcnow().timestamp(),
             processed=True,
-        )
+        ).where(BorderCapture.id == image_id)
+
         upd.execute()
-        logger.info("[task] DB updated. ID: %r" % model.id)
+        logging.info("[task] DB updated. ID: %r" % model.id)
