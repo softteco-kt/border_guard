@@ -26,6 +26,7 @@ app.add_middleware(
 
 from enum import Enum
 
+
 class Yolov5(str, Enum):
     nano = "yolov5n"
     small = "yolov5s"
@@ -59,6 +60,8 @@ async def get_db_information(
     processed: bool | None = None,
     start_timestamp: int | None = None,
     end_timestamp: int | None = None,
+    offset: int = 0,
+    limit: int = 50,
 ):
     with database:
         db_model = BorderCapture.select()
@@ -71,7 +74,7 @@ async def get_db_information(
             db_model = db_model.where(BorderCapture.processed == processed)
 
         db_model = db_model.order_by(BorderCapture.created_at.asc())
-        return list(db_model)
+        return list(db_model.offset(offset).limit(limit))
 
 
 @app.post("/cars_on_border", response_model=CarsMetaData)
