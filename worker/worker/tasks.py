@@ -27,7 +27,6 @@ def process_img(image_id):
     with database_connection:
 
         model = BorderCapture.get(id=image_id)
-
         # Model image_path is a url to static file
         response = requests.post(
             "http://api:8000/cars_on_border",
@@ -37,11 +36,9 @@ def process_img(image_id):
             # timeout for (connection , read)
             timeout=(5, 30),
         )
-
         if response.status_code != 200:
             # Temporary exception
             raise Exception("Non 200 API Response")
-
         try:
             response_amount = response.json()["amount"]
         except:
@@ -54,6 +51,6 @@ def process_img(image_id):
             processed_at=datetime.datetime.utcnow().timestamp(),
             processed=True,
         ).where(BorderCapture.id == image_id)
-
         upd.execute()
-        logging.info("[task] DB updated. ID: %r" % model.id)
+
+        logger.info("[task] DB updated. ID: %r" % model.id)

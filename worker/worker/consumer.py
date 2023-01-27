@@ -1,5 +1,3 @@
-import logging
-
 from celery import bootsteps
 from kombu import Consumer, Exchange, Queue
 
@@ -22,7 +20,6 @@ class CustomConsumer(bootsteps.ConsumerStep):
         return [Consumer(channel, queues=[QUEUE], callbacks=[self.handle_message])]
 
     def handle_message(self, body, message):
-        logging.info(f"[consumer] Received {body}")
         process_img.delay(body)
         message.ack()
 

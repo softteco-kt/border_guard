@@ -9,7 +9,7 @@ logging.basicConfig(
     format=FORMAT, level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)]
 )
 
-broker_url = (f"pyamqp://{RABBITMQ_HOST}:{RABBITMQ_PORT}",)
+broker_url = (f"pyamqp://{RABBITMQ_HOST}:{RABBITMQ_PORT}/",)
 
 # Number of CPU cores
 worker_concurrency = 1
@@ -22,15 +22,3 @@ worker_send_task_events = True
 
 # List of modules to import when the Celery worker starts.
 imports = ("worker.tasks",)
-
-# Route messages from specified source to specific task
-task_routes = {
-    "worker.tasks.process_img": {
-        "queue": IMAGE_QUEUE,
-        "exchange": IMAGE_EXCHANGE,
-        "routing_key": IMAGE_ROUTING_KEY,
-    },
-}
-
-# Declare Queues for celery to listen to
-task_queues = (QUEUE,)
