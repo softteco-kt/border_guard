@@ -40,7 +40,7 @@ def fetch_image(retries=RETRY_ATTEMTPS):
         image.screenshot("./data/" + img_name)
 
         assert img_name in os.listdir("./data/")
-        logger.info(f"Successfuly fetched an image - {img_name}!")
+        logger.info(f"[parser] Successfuly fetched an image - {img_name}!")
 
         with database:
             model = BorderCapture.create(
@@ -49,7 +49,6 @@ def fetch_image(retries=RETRY_ATTEMTPS):
 
         # ID is of type UUID, thus conversion req.
         send_to_qu(str(model.id))
-        logger.info("Sent to queue!")
 
     except Exception as e:
 
