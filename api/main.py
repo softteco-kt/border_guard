@@ -73,7 +73,7 @@ async def get_db_information(
         if processed:
             db_model = db_model.where(BorderCapture.processed == processed)
 
-        db_model = db_model.order_by(BorderCapture.created_at.asc())
+        db_model = db_model.order_by(BorderCapture.created_at.desc())
         return list(db_model.offset(offset).limit(limit))
 
 
