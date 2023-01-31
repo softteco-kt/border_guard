@@ -60,21 +60,24 @@ async def get_db_information(
     processed: bool | None = None,
     start_timestamp: int | None = None,
     end_timestamp: int | None = None,
-    offset: int = 0,
-    limit: int = 50,
+    offset: int | None = None,
+    limit: int | None = None,
 ):
     with database:
-        db_model = BorderCapture.select()
+        query = BorderCapture.select()
 
         if start_timestamp:
-            db_model = db_model.where(BorderCapture.processed_at >= start_timestamp)
+            query = query.where(BorderCapture.processed_at >= start_timestamp)
         if end_timestamp:
-            db_model = db_model.where(BorderCapture.processed_at <= end_timestamp)
+            query = query.where(BorderCapture.processed_at <= end_timestamp)
         if processed:
-            db_model = db_model.where(BorderCapture.processed == processed)
+            query = query.where(BorderCapture.processed == processed)
+        if offset:
+            query = query.offset(offset)
+        if limit:
+            query = query.limit(limit)
 
-        db_model = db_model.order_by(BorderCapture.created_at.desc())
-        return list(db_model.offset(offset).limit(limit))
+        return list(query.order_by(BorderCapture.created_at.desc()))
 
 
 @app.post("/cars_on_border", response_model=CarsMetaData)
