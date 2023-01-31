@@ -48,7 +48,11 @@ def draw_altair(data):
     return chart
 
 
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    title="Border Guard",
+    menu_items={},
+)
 
 st.title("Statistics")
 
