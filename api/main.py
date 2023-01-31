@@ -67,9 +67,9 @@ async def get_db_information(
         query = BorderCapture.select()
 
         if start_timestamp:
-            query = query.where(BorderCapture.processed_at >= start_timestamp)
+            query = query.where(BorderCapture.created_at >= start_timestamp)
         if end_timestamp:
-            query = query.where(BorderCapture.processed_at <= end_timestamp)
+            query = query.where(BorderCapture.created_at <= end_timestamp)
         if processed:
             query = query.where(BorderCapture.processed == processed)
         if offset:
