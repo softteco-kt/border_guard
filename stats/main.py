@@ -50,7 +50,8 @@ def draw_altair(data):
 
 st.set_page_config(
     layout="wide",
-    title="Border Guard",
+    page_title="Border Guard",
+    page_icon="🧊",
     menu_items={},
 )
 
