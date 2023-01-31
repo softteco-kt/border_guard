@@ -63,8 +63,9 @@ input_ma = ma_widget.number_input("Moving average (Hours)", 1) * 3
 input_date_from = from_widget.date_input("Date From:", dt.today() - td(days=1))
 input_date_to = to_widget.date_input("Date to: ")
 
-# Get API data
-data = get_data(date_from=input_date_from, date_to=input_date_to)
+with st.spinner(text="Fetching data..."):
+    # Get API data
+    data = get_data(date_from=input_date_from, date_to=input_date_to)
 
 try:
     # Calculate moving average
