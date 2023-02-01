@@ -121,12 +121,17 @@ def draw_altair(data: pd.DataFrame, timeframe: str):
 
 st.set_page_config(layout="wide", page_title="Border Guard", page_icon="🧊")
 
-hide_menu_style = """
+# Disable scrolling and remove menu
+css = """
         <style>
-        #MainMenu {visibility: hidden;}
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            section.main > div:has(~ footer ) {
+                padding-bottom: 5px;
+            }
         </style>
         """
-st.markdown(hide_menu_style, unsafe_allow_html=True)
+st.markdown(css, unsafe_allow_html=True)
 
 st.title("Statistics")
 
@@ -136,7 +141,6 @@ input_tf = tf_widget.selectbox("Timeframe:", Timeframe.list())
 input_ma = ma_widget.number_input("Moving average:", 1)
 input_date_from = from_widget.date_input("Date From:", dt.today() - td(days=1))
 input_date_to = to_widget.date_input("Date To:")
-
 
 try:
     # Get API data
