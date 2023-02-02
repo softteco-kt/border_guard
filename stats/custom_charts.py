@@ -48,14 +48,22 @@ def draw_altair_bin(data: pd.DataFrame, timeframe: str):
 def draw_altair_agg(data: pd.DataFrame, timeframe: str):
     tooltip = [Columns.cars]
 
+    highlight = alt.selection_single(on="mouseover")
     # Chart configs on given data
-    base = alt.Chart(data).encode(
-        x=alt.X(Columns.time, title="Datetime: " + timeframe, type="ordinal"),
-        y=alt.Y(Columns.cars, title="Number of Cars", type="quantitative"),
-        tooltip=tooltip,
+    base = (
+        alt.Chart(data)
+        .mark_bar()
+        .encode(
+            x=alt.X(Columns.time, title="Datetime: " + timeframe, type="ordinal"),
+            y=alt.Y(Columns.cars, title="Number of Cars", type="quantitative"),
+            tooltip=tooltip,
+            color=alt.condition(
+                highlight,
+                alt.value("steelblue"),
+                alt.value("lightblue"),
+            ),
+        )
+        .add_selection(highlight)
     )
 
-    # Draw scatter plot and line chart with base chart data
-    chart = alt.layer(base.mark_bar())
-
-    return chart
+    return base
