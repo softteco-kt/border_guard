@@ -6,7 +6,7 @@ class Timeframe(enum.StrEnum):
 
     min = "None"
     hourly = "Hours"
-    daily = "Daily"
+    daily = "Days"
 
     @classmethod
     def list(cls):
