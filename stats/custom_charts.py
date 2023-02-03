@@ -4,7 +4,7 @@ import pandas as pd
 from custom_enums import *
 
 
-def draw_altair_bin(data: pd.DataFrame, timeframe: str):
+def draw_altair_bin(data: pd.DataFrame, timeframe: str, moving_average: bool = False):
     tooltip = [Columns.cars]
 
     x_axis_label = None
@@ -20,25 +20,6 @@ def draw_altair_bin(data: pd.DataFrame, timeframe: str):
         case Timeframe.daily:
             tooltip.append("Day")
             x_axis_label = "yearmonthdate"
-
-    # Create a selection that chooses the nearest point & selects based on x-value
-    # By default, all data values are considered to lie within an empty selection.
-    # When empty set to none, selections contain no data values.
-    highlight = alt.selection(
-        type="single", on="mouseover", nearest=True, empty="none", fields=[Columns.time]
-    )
-
-    # Transparent selectors across the chart. This is what tells us
-    # the x-value of the cursor
-    selectors = (
-        alt.Chart(data)
-        .mark_point()
-        .encode(
-            x=f"{Columns.time}:T",
-            opacity=alt.value(0),
-        )
-        .add_selection(highlight)
-    )
 
     # Chart configs on given data
     base = (
@@ -57,21 +38,27 @@ def draw_altair_bin(data: pd.DataFrame, timeframe: str):
         )
     )
 
-    # Moving average line chart
-    line = base.mark_line().encode(
-        y=alt.Y(Columns.moving_average, type="quantitative"),
-        color=alt.value("#FFAA00"),
+    # Create a selection that chooses the nearest point & selects based on x-value
+    # By default, all data values are considered to lie within an empty selection.
+    # When empty set to none, selections contain no data values.
+    highlight = alt.selection(
+        type="single",
+        on="mouseover",
+        nearest=True,
+        empty="none",
+        fields=[Columns.time],
     )
 
-    # Draw points on the line, add tooltip to the point and highlight based on selection
-    points = line.mark_point().encode(
-        tooltip=[Columns.moving_average, Columns.time],
-        opacity=alt.condition(highlight, alt.value(1), alt.value(0)),
-    )
-
-    # Draw text labels near the points, and highlight based on selection
-    text = line.mark_text(align="left", dx=5, dy=-5).encode(
-        text=alt.condition(highlight, f"{Columns.moving_average}:Q", alt.value(" ")),
+    # Transparent selectors across the chart. This is what tells us
+    # the x-value of the cursor
+    selectors = (
+        alt.Chart(data)
+        .mark_point()
+        .encode(
+            x=f"{Columns.time}:T",
+            opacity=alt.value(0),
+        )
+        .add_selection(highlight)
     )
 
     # Draw a rule at the location of the selection
@@ -82,13 +69,34 @@ def draw_altair_bin(data: pd.DataFrame, timeframe: str):
         .transform_filter(highlight)
     )
 
+    moving_average_layers = ()
+    if moving_average:
+        # Moving average line chart
+        line = base.mark_line().encode(
+            y=alt.Y(Columns.moving_average, type="quantitative"),
+            color=alt.value("#FFAA00"),
+        )
+
+        # Draw points on the line, add tooltip to the point and highlight based on selection
+        points = line.mark_point().encode(
+            tooltip=[Columns.moving_average, Columns.time],
+            opacity=alt.condition(highlight, alt.value(1), alt.value(0)),
+        )
+
+        # Draw text labels near the points, and highlight based on selection
+        text = line.mark_text(align="left", dx=5, dy=-5).encode(
+            text=alt.condition(
+                highlight, f"{Columns.moving_average}:Q", alt.value(" ")
+            ),
+        )
+
+        moving_average_layers = (line, points, text)
+
     # Draw scatter plot and line chart with base chart data
     chart = alt.layer(
-        line,
+        *moving_average_layers,
         selectors,
-        points,
         rules,
-        text,
         base.mark_point(),
     )
 

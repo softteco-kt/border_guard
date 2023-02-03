@@ -44,7 +44,7 @@ try:
             # Apply binning to data
             with st.sidebar:
                 st.write(sidebar_header)
-                input_ma = st.number_input("Moving average:", 1)
+                input_ma = st.number_input("Moving average:", 0)
                 input_tf = st.selectbox("Bucket by", Timeframe.list())
 
             data = bin_data(
@@ -52,7 +52,10 @@ try:
                 timeframe=input_tf,
                 moving_average=input_ma,
             )
-            chart = draw_altair_bin(data, timeframe=input_tf)
+
+            chart = draw_altair_bin(
+                data, timeframe=input_tf, moving_average=True if input_ma > 0 else False
+            )
 
         case "Aggregation":
             with st.sidebar:
