@@ -70,6 +70,7 @@ def bin_data(
 
 
 def agg_data(data, timeframe: str) -> pd.DataFrame:
+
     data = pd.DataFrame(data, columns=["created_at", "number_of_cars"])
 
     data.rename(
@@ -82,10 +83,8 @@ def agg_data(data, timeframe: str) -> pd.DataFrame:
 
     # Create column to aggregate on
     match timeframe:
-        case Timeframe.min:
-            data[Columns.time] = data[Columns.time].dt.strftime("%H:%M")
 
-        case Timeframe.hourly:
+        case (Timeframe.min | Timeframe.hourly):
             data[Columns.time] = data[Columns.time].dt.strftime("%H:00")
 
         case Timeframe.daily:
