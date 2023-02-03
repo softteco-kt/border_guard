@@ -4,7 +4,7 @@ import enum
 class Timeframe(enum.StrEnum):
     """Data timeframes"""
 
-    min = "Minutes"
+    min = "None"
     hourly = "Hours"
     daily = "Daily"
 

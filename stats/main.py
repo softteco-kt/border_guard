@@ -24,9 +24,8 @@ st.markdown(css, unsafe_allow_html=True)
 st.title("Statistics")
 
 # Input for api filtering
-type_widget, tf_widget, from_widget, to_widget = st.columns(4)
-input_type = type_widget.selectbox("Aggregation type", ["Aggregation", "Binning"])
-input_tf = tf_widget.selectbox("Timeframe:", Timeframe.list())
+type_widget, from_widget, to_widget = st.columns(3)
+input_type = type_widget.selectbox("View", ["Aggregation", "Plain"])
 input_date_from = from_widget.date_input("Date From:", dt.today() - td(days=1))
 input_date_to = to_widget.date_input("Date To:")
 
@@ -38,14 +37,15 @@ try:
         date_to=input_date_to,
     )
 
+    sidebar_header = "**Additional params:**"
     match input_type:
 
-        case "Binning":
+        case "Plain":
             # Apply binning to data
             with st.sidebar:
-                st.write("Additional params:")
-                # in_widget, _, _, _ = st.columns(4)
+                st.write(sidebar_header)
                 input_ma = st.number_input("Moving average:", 1)
+                input_tf = st.selectbox("Bucket by", Timeframe.list())
 
             data = bin_data(
                 raw_data,
@@ -55,6 +55,12 @@ try:
             chart = draw_altair_bin(data, timeframe=input_tf)
 
         case "Aggregation":
+            with st.sidebar:
+                st.write(sidebar_header)
+                input_tf = st.selectbox(
+                    "Aggregate by", [Timeframe.hourly, Timeframe.daily]
+                )
+
             # Apply aggregation to data
             data = agg_data(
                 raw_data,
