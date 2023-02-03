@@ -93,4 +93,7 @@ def agg_data(data, timeframe: str) -> pd.DataFrame:
     # Aggregate data
     data = data.groupby(Columns.time)[Columns.cars].mean().reset_index()
 
+    # Round DataFrame with precision to 1 after comma
+    data = data.round(1)
+
     return data
