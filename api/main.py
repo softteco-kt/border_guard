@@ -1,11 +1,12 @@
 from functools import lru_cache
 from io import BytesIO
+from enum import Enum
 
 import requests
 import torch
-
 from fastapi import Body, Depends, FastAPI, File, HTTPException, UploadFile, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
 
 from db import database, BorderCapture, AxisAlignedBoundingBoxNorm
@@ -24,10 +25,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from enum import Enum
+# Serves static files from a shared volume with parser microservice
+app.mount("/static", StaticFiles(directory="/usr/src/parser/data"), name="static")
 
 
 class Yolov5(str, Enum):
+    """YOLOv5 available model distribution/size names."""
+
     nano = "yolov5n"
     small = "yolov5s"
     medium = "yolov5m"
@@ -37,6 +41,10 @@ class Yolov5(str, Enum):
 
 @lru_cache
 def get_model(model_size: Yolov5 = Yolov5.nano):
+    """
+    Given the model distribution name, downloads model i.e. saved parameters
+    and weights of pre-trained model, to current directory.
+    """
     return torch.hub.load(
         "ultralytics/yolov5", model_size, pretrained=True, force_reload=False
     )
@@ -51,8 +59,7 @@ def startup():
 
     # Download and cache Yolov5 model variants
     for i in Yolov5:
-        # get_model(i)
-        pass
+        get_model(i)
 
 
 @app.get("/cars_on_border", response_model=list[BorderCaptureOut])
@@ -72,10 +79,22 @@ async def get_db_information(
             query = query.where(BorderCapture.created_at <= end_timestamp)
         if processed:
             query = query.where(BorderCapture.processed == processed)
-        if offset:
-            query = query.offset(offset)
-        if limit:
-            query = query.limit(limit)
+
+        # If neither of timestamps are given, set default or given offset / limit
+        if not any([start_timestamp, end_timestamp]):
+            # Set default values if not provided
+            if not offset:
+                offset = 0
+            if not limit:
+                limit = 50
+
+            query = query.offset(offset).limit(limit)
+        # Otherwise set offset and limit only if they are provided in params
+        else:
+            if offset:
+                query = query.offset(offset)
+            if limit:
+                query = query.limit(limit)
 
         return list(query.order_by(BorderCapture.created_at.desc()))
 
