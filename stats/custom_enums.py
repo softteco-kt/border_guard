@@ -17,6 +17,8 @@ class Columns(enum.StrEnum):
     """DataFrame column names"""
 
     moving_average = "Moving Average"
+    image = "image"
+    image_path = "image_path"
     cars = "Number of cars"
     time = "Datetime"
     day = "Day"

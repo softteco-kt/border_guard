@@ -29,12 +29,24 @@ def get_data(
     return pd.DataFrame(response.json())
 
 
+def add_url_column(data: pd.DataFrame) -> pd.DataFrame:
+    data[Columns.image] = (
+        "http://164.92.167.135:8000/static/"
+        + data["image_path"]
+        .str.split(
+            "/usr/src/parser/data/",
+        )
+        .str[1]
+    )
+    return data
+
+
 def bin_data(
     data,
     timeframe: str,
     moving_average: int = 1,
 ) -> pd.DataFrame:
-    data = pd.DataFrame(data, columns=["created_at", "number_of_cars"])
+    data = pd.DataFrame(data, columns=["created_at", "number_of_cars", Columns.image])
 
     data.rename(
         columns={"created_at": Columns.time, "number_of_cars": Columns.cars},

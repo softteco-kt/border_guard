@@ -37,6 +37,8 @@ try:
         date_to=input_date_to,
     )
 
+    raw_data = add_url_column(raw_data)
+
     sidebar_header = "**Additional params:**"
     match input_type:
 

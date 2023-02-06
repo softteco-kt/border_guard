@@ -13,6 +13,7 @@ def draw_altair_bin(data: pd.DataFrame, timeframe: str, moving_average: bool = F
     match timeframe:
         case Timeframe.min:
             tooltip.append("Time")
+            tooltip.append(Columns.image)
             x_axis_label = "yearmonthdatehoursminutes"
         case Timeframe.hourly:
             tooltip.append("Time")
@@ -24,7 +25,7 @@ def draw_altair_bin(data: pd.DataFrame, timeframe: str, moving_average: bool = F
     # Chart configs on given data
     base = (
         alt.Chart(data)
-        .mark_point()
+        .mark_circle()
         .encode(
             x=alt.X(
                 Columns.time,
@@ -97,7 +98,7 @@ def draw_altair_bin(data: pd.DataFrame, timeframe: str, moving_average: bool = F
         *moving_average_layers,
         selectors,
         rules,
-        base.mark_point(),
+        base,
     )
 
     return chart
