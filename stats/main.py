@@ -38,7 +38,7 @@ try:
     )
 
     raw_data = add_url_column(raw_data)
-
+    raw_data
     sidebar_header = "**Additional params:**"
     match input_type:
 
@@ -74,5 +74,6 @@ try:
             chart = draw_altair_agg(data, timeframe=input_tf)
 
     st.altair_chart(chart, use_container_width=True)
+    st.write("* Time is in UTC")
 except Exception as e:
     st.write("No data...")
