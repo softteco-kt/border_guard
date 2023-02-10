@@ -74,6 +74,6 @@ try:
             chart = draw_altair_agg(data, timeframe=input_tf)
 
     st.altair_chart(chart, use_container_width=True)
-    st.write("* Time is in UTC")
+    st.write("*\* Time is in UTC*")
 except Exception as e:
     st.write("No data...")

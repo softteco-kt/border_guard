@@ -55,6 +55,12 @@ class AxisAlignedBoundingBoxNorm(BaseModel):
         ]
 
 
+class CaptureParams(BaseModel):
+    """1-1 Relation for additional features extracted from image processing."""
+
+    params = pw.ForeignKeyField(BorderCapture, backref="params", unique=True)
+
+
 def init_db():
     database.connect()
     assert database.is_connection_usable()
