@@ -29,20 +29,37 @@ services:
             - POSTGRES_PASSWORD
             - POSTGRES_DATABASE
 
-    parser:
+    migrations:
         build:
-            context: ./parser
+            context: ./migrations
             dockerfile: Dockerfile
-        container_name: parser
+        container_name: migrations
         command: >
             sh -c " \
                 ./wait-for postgresdb:5432 && \
                 ./wait-for rabbitmq:5672 && \
                 sh ./docker-entrypoint.sh"
+        depends_on:
+            - postgresdb
+        environment:
+            - POSTGRES_DATABASE
+            - POSTGRES_USERNAME
+            - POSTGRES_PASSWORD
+            - POSTGRES_HOST
+            - POSTGRES_PORT        
+        networks:
+            - basenet
+
+    parser:
+        build:
+            context: ./parser
+            dockerfile: Dockerfile
+        container_name: parser
+        command: ["sh", "./docker-entrypoint.sh"]
         restart: always
         depends_on:
-            - rabbitmq
-            - postgresdb
+            migrations:
+                condition: service_completed_successfully
         networks:
             - basenet
         environment:
@@ -65,17 +82,13 @@ services:
             context: ./worker
             dockerfile: celery.Dockerfile
         container_name: worker
-        command: >
-            sh -c " \
-                ./wait-for rabbitmq:5672 && \
-                ./wait-for postgresdb:5432 && \ 
-                celery -A worker.main worker"
+        command: ["celery", "-A", "worker.main", "worker"]
         restart: always
         networks:
             - basenet
         depends_on:
-            - rabbitmq
-            - postgresdb
+            migrations:
+                condition: service_completed_successfully
         environment:
             - RABBITMQ_HOST
             - RABBITMQ_PORT
@@ -95,7 +108,7 @@ services:
             context: ./api
             dockerfile: Dockerfile
         container_name: api
-        command: ["./docker-entrypoint.sh" ]
+        command: ["./docker-entrypoint.sh"]
         deploy:
             mode: replicated
             replicas: 1
@@ -109,6 +122,9 @@ services:
             timeout: 3s
             start_period: 30s
             retries: 3
+        depends_on:
+            migrations:
+                condition: service_completed_successfully
         networks:
             - basenet
         ports:
