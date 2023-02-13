@@ -1,7 +1,6 @@
 import datetime
 import os
 import uuid
-
 import peewee as pw
 
 POSTGRES_DATABASE = os.environ["POSTGRES_DATABASE"]
@@ -30,10 +29,12 @@ class BaseModel(pw.Model):
 
 
 class BorderCapture(BaseModel):
-    number_of_cars = pw.IntegerField(null=True)
     image_path = pw.CharField(unique=True)
     processed = pw.BooleanField(default=False)
     processed_at = pw.TimestampField(null=True)
+
+    number_of_cars = pw.IntegerField(null=True)
+    is_valid = pw.BooleanField(default=False)
 
 
 # one-to-many bounding boxes to border image instances, can have multiple bounding boxes
@@ -54,3 +55,9 @@ class AxisAlignedBoundingBoxNorm(BaseModel):
             pw.Check("{0} <= 1 and {0} >= 0".format("width")),
             pw.Check("{0} <= 1 and {0} >= 0".format("height")),
         ]
+
+
+class CaptureParams(BaseModel):
+    """1-1 Relation for additional features extracted from image processing."""
+
+    params = pw.ForeignKeyField(BorderCapture, backref="params", unique=True)
