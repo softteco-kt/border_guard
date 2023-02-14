@@ -37,6 +37,4 @@ COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 
 COPY . .
 
-RUN chmod +x ./wait-for
-
 CMD celery -A worker.main worker -l INFO

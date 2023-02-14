@@ -58,7 +58,6 @@ RUN apt install -y ./$CHROME_EXE && \
 
 COPY . .
 
-RUN chmod +x ./wait-for &&\
-	mkdir -p data && touch logs.log
+RUN mkdir -p data && touch logs.log
 
 CMD ["sh", "./docker-entrypoint.sh"]
