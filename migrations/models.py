@@ -28,7 +28,7 @@ class BaseModel(pw.Model):
 
     class Meta:
         database = database
-        evolve = False # automatic migrations are ignored for this model
+        evolve = False  # automatic migrations are ignored for this model
 
 
 class BorderCapture(BaseModel):
@@ -41,6 +41,7 @@ class BorderCapture(BaseModel):
 
     class Meta:
         evolve = True
+
 
 # one-to-many bounding boxes to border image instances, can have multiple bounding boxes
 # accessible as as a special attribute, BorderCapture.bboxes
@@ -78,10 +79,12 @@ def init_db():
     database.create_tables([BorderCapture, AxisAlignedBoundingBoxNorm], safe=True)
     database.close()
 
+
 def migrate():
 
     with database:
         database.evolve(interactive=False)
-        
+
+
 if __name__ == "__main__":
     migrate()
