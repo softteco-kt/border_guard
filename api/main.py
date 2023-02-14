@@ -10,8 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
 
 from db import database, BorderCapture, AxisAlignedBoundingBoxNorm
-
 from schemas import BorderCaptureOut, CarsMetaData
+from image_processing.utils import is_black, is_similar
 
 app = FastAPI()
 
@@ -97,6 +97,77 @@ async def get_db_information(
                 query = query.limit(limit)
 
         return list(query.order_by(BorderCapture.created_at.desc()))
+
+
+@app.post("/is_valid")
+async def validate_photo_for_processing(
+    image_url: str = Body(None),
+    image_path: str = Body(None),
+    image_binary: UploadFile = File(None),
+):
+    if not any([image_url, image_binary, image_path]):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "field error": "At least one of the values should be provided",
+                "values": {
+                    "image_url": image_url,
+                    "image_path": image_path,
+                    "image_binary": image_binary,
+                },
+            },
+        )
+
+    # Open image
+    try:
+        if image_binary:
+            image_to_process = Image.open(BytesIO(await image_binary.read()))
+        elif image_url:
+            response = requests.get(image_url)
+            image_to_process = Image.open(BytesIO(response.content))
+        elif image_path:
+            image_to_process = Image.open(image_path, "r")
+    except:
+        raise HTTPException(status_code=404, detail={"ValueError": "Image Not Found."})
+
+    # Retrieve last valid image from database
+    with database:
+        last_valid_image_path = (
+            BorderCapture.select(BorderCapture.image_path)
+            .order_by(BorderCapture.processed_at.desc())
+            .where(is_valid=True)
+            .limit(1)
+            .first()
+        )
+
+    # Retrieve last valid image from filesystem
+    try:
+        last_valid_image = Image.open(last_valid_image_path, "r")
+    except:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "field error": "No image found in filesystem",
+            },
+        )
+
+    if is_similar(image_to_process, last_valid_image):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "field error": "Image is similar to previous image",
+            },
+        )
+
+    if is_black(image_to_process):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "field error": "Image is black",
+            },
+        )
+
+    return True
 
 
 @app.post("/cars_on_border", response_model=CarsMetaData)
