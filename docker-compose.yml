@@ -36,6 +36,7 @@ services:
         container_name: migrations
         command: >
             sh -c " \
+                chmod +x ./wait-for && \
                 ./wait-for postgresdb:5432 && \
                 ./wait-for rabbitmq:5672 && \
                 sh ./docker-entrypoint.sh"
