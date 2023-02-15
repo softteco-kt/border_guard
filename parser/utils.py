@@ -42,3 +42,27 @@ def process_unprocessed_images():
         for image_id in unprocessed_images:
             # Send to queue for further processing
             send_to_qu(str(image_id))
+
+
+def process_unvalidated_images():
+
+    with database:
+        images = BorderCapture.select().where(BorderCapture.is_valid == None)
+
+        for image in images:
+
+            # Check if the image is valid
+            response = requests.post(
+                "http://api:8000/is_valid", data={"image_path": image.image_path}
+            )
+
+            if response.status_code == 200:
+                is_valid = True
+                print(response)
+            else:
+                is_valid = False
+                print(response, response.content)
+            upd = BorderCapture.update(is_valid=is_valid).where(
+                BorderCapture.id == image.id
+            )
+            upd.execute()
