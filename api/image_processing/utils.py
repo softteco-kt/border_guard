@@ -7,7 +7,7 @@ import requests
 def is_black(img: Image, threshold=0.99):
 
     # check if img is a url
-    if img.startswith("http"):
+    if isinstance(img, str) and img.startswith("http"):
         img_bytes = requests.get(img, stream=True).raw
         img = Image.open(io.BytesIO(img_bytes))
 
