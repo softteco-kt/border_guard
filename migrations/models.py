@@ -37,7 +37,7 @@ class BorderCapture(BaseModel):
     processed_at = pw.TimestampField(null=True)
 
     number_of_cars = pw.IntegerField(null=True)
-    is_valid = pw.BooleanField(default=False)
+    is_valid = pw.BooleanField(null=True)
 
     class Meta:
         evolve = True
