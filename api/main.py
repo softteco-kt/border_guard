@@ -134,9 +134,10 @@ async def validate_photo_for_processing(
         last_valid_image_path = (
             BorderCapture.select(BorderCapture.image_path)
             .order_by(BorderCapture.processed_at.desc())
-            .where(is_valid=True)
+            .where(BorderCapture.is_valid=True)
             .limit(1)
             .first()
+            .image_path
         )
 
     # Retrieve last valid image from filesystem
