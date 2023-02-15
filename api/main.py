@@ -28,7 +28,6 @@ app.add_middleware(
 # Serves static files from a shared volume with parser microservice
 app.mount("/static", StaticFiles(directory="/usr/src/parser/data"), name="static")
 
-
 class Yolov5(str, Enum):
     """YOLOv5 available model distribution/size names."""
 
