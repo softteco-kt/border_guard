@@ -39,6 +39,9 @@ try:
 
     raw_data = add_url_column(raw_data)
 
+    # Include only valid data
+    raw_data = raw_data[raw_data.is_valid == True]
+
     sidebar_header = "**Additional params:**"
     match input_type:
 
