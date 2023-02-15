@@ -27,7 +27,7 @@ st.title("Statistics")
 type_widget, from_widget, to_widget = st.columns(3)
 input_type = type_widget.selectbox("View", ["Aggregation", "Plain"])
 input_date_from = from_widget.date_input("Date From:", dt.today() - td(days=1))
-input_date_to = to_widget.date_input("Date To:")
+input_date_to = to_widget.date_input("Date To:", dt.today() + td(days=1))
 
 
 try:
