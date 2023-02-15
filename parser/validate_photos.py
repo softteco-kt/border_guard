@@ -12,7 +12,9 @@ if __name__ == "__main__":
 
     for image in images:
 
-        image_url = "http://api:8000/static/" + image.image_path.split("/")[-1]
+        image_url = (
+            "http://164.92.167.135:8000/static/" + image.image_path.split("/")[-1]
+        )
 
         # Check if the image is valid
         response = requests.post(

@@ -28,6 +28,7 @@ app.add_middleware(
 # Serves static files from a shared volume with parser microservice
 app.mount("/static", StaticFiles(directory="/usr/src/parser/data"), name="static")
 
+
 class Yolov5(str, Enum):
     """YOLOv5 available model distribution/size names."""
 
@@ -123,6 +124,11 @@ async def validate_photo_for_processing(
             image_to_process = Image.open(BytesIO(await image_binary.read()))
         elif image_url:
             response = requests.get(image_url)
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail={"Invalid URL": response.content},
+                )
             image_to_process = Image.open(BytesIO(response.content))
         elif image_path:
             image_to_process = Image.open(image_path, "r")
