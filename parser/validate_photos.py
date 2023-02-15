@@ -20,9 +20,11 @@ if __name__ == "__main__":
         )
 
         if response.status_code == 200:
-            # BorderCapture.update(
-            #     is_valid=True,
-            # ).where(BorderCapture.id == image.id)
-            print(image_url, "is valid")
+            is_valid = True
+        else:
+            is_valid = False
+            print(response.content)
+
+        # BorderCapture.update(is_valid=is_valid).where(BorderCapture.id == image.id)
 
     database.close()
