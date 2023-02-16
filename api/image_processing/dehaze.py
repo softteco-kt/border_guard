@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os, cv2
-import numpy as np
+import os
 
-np.set_printoptions(threshold=np.inf)
+import cv2
+import numpy as np
 from guidedfilter import guided_filter
 from PIL import Image
+
+np.set_printoptions(threshold=np.inf)
 
 L = 256  # color depth
 

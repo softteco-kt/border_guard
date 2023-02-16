@@ -1,11 +1,12 @@
-from models import BorderCapture, database
-from send_msg import send_to_qu
-from PIL import Image
-from io import BytesIO
-import imagehash
-
-import requests
 import os
+from io import BytesIO
+
+import imagehash
+import requests
+
+from models import BorderCapture, database
+from PIL import Image
+from send_msg import send_to_qu
 
 
 def write_untracked_images_to_db():

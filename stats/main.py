@@ -1,10 +1,10 @@
-import streamlit as st
-
 from datetime import datetime as dt
 from datetime import timedelta as td
 
-from custom_enums import *
+import streamlit as st
+
 from custom_charts import *
+from custom_enums import *
 from data import *
 
 st.set_page_config(layout="wide", page_title="Border Guard", page_icon="🧊")

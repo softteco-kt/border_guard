@@ -1,11 +1,11 @@
-import logging
-import requests
 import datetime
+import logging
 import sys
+
+import requests
 
 from models import BorderCapture
 from models import database as database_connection
-
 from worker.main import app
 
 logger = logging.getLogger(__name__)

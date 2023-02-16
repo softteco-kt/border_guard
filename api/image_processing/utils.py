@@ -1,7 +1,7 @@
-from PIL import Image
-
 import io
+
 import requests
+from PIL import Image
 
 
 def is_black(img: Image, threshold=0.99):

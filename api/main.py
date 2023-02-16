@@ -1,15 +1,16 @@
+from enum import Enum
 from functools import lru_cache
 from io import BytesIO
-from enum import Enum
 
 import requests
 import torch
-from fastapi import Body, Depends, FastAPI, File, HTTPException, UploadFile, Query
+from PIL import Image, ImageOps
+from fastapi import (Body, Depends, FastAPI, File, HTTPException, Query,
+                     UploadFile)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from PIL import Image, ImageOps
 
-from db import database, BorderCapture, AxisAlignedBoundingBoxNorm
+from db import AxisAlignedBoundingBoxNorm, BorderCapture, database
 from schemas import BorderCaptureOut, CarsMetaData
 from image_processing.utils import is_black, is_similar
 

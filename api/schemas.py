@@ -1,11 +1,10 @@
-from pydantic.utils import GetterDict
-from pydantic import BaseModel
-from typing import Any, List, Union
+import datetime
+from typing import Any
+from uuid import UUID
 
 import peewee
-import datetime
-
-from uuid import UUID
+from pydantic import BaseModel
+from pydantic.utils import GetterDict
 
 
 class PeeweeGetterDict(GetterDict):

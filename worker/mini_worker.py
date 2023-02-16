@@ -1,11 +1,11 @@
 from kombu import Connection
 from kombu.mixins import ConsumerMixin
 
-from worker.env import *
+from celeryconfig import broker_url
 from worker.consumer import QUEUE
+from worker.env import *
 from worker.tasks import process_img
 
-from celeryconfig import broker_url
 
 class Worker(ConsumerMixin):
     def __init__(self, connection, queues):

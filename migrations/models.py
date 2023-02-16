@@ -1,9 +1,9 @@
 import datetime
 import os
 import uuid
-import peewee as pw
-import peeweedbevolve
 
+import peewee as pw
+import peeweedbevolve  # isort: off
 
 POSTGRES_DATABASE = os.environ["POSTGRES_DATABASE"]
 POSTGRES_USERNAME = os.environ["POSTGRES_USERNAME"]

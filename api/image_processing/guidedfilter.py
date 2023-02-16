@@ -4,8 +4,8 @@
 Reference:
 http://research.microsoft.com/en-us/um/people/kahe/eccv10/
 """
-from itertools import combinations_with_replacement
 from collections import defaultdict
+from itertools import combinations_with_replacement
 
 import numpy as np
 from numpy.linalg import inv

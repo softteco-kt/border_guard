@@ -1,5 +1,8 @@
-import numpy as np
 import cv2
+import numpy as np
+# Step 5: Smoothing Transmission Map using Guided Filter
+# src: https://github.com/ba-san/Python-image-enhancement-with-bright-dark-prior/blob/master/src/guidedfilter.py
+from image_processing.guidedfilter import guided_filter
 
 # Night time photo illumination improvement scripts, using cv2
 # https://learnopencv.com/improving-illumination-in-night-time-images/#sec2.1
@@ -63,9 +66,6 @@ def get_corrected_transmission(I, A, darkch, brightch, init_t, alpha, omega, w):
     return np.abs(corrected_t)
 
 
-# Step 5: Smoothing Transmission Map using Guided Filter
-# src: https://github.com/ba-san/Python-image-enhancement-with-bright-dark-prior/blob/master/src/guidedfilter.py
-from image_processing.guidedfilter import guided_filter
 
 
 # Step 6: Calculating the Resultant Image
