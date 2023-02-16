@@ -27,29 +27,40 @@ def process_img(image_id):
     with database_connection:
 
         model = BorderCapture.get(id=image_id)
-        # Model image_path is a url to static file
-        response = requests.post(
-            "http://api:8000/cars_on_border",
-            # Use the biggest YOLO model
-            params={"model_size": "yolov5x"},
-            data={"image_path": model.image_path},
-            # timeout for (connection , read)
-            timeout=(5, 30),
+
+        # Check if retrieved image is valid
+        image_is_valid = requests.post(
+            "http://api:8000/is_valid", data={"image_path": model.image_path}
         )
-        if response.status_code != 200:
-            # Temporary exception
-            raise Exception("Non 200 API Response")
-        try:
-            response_amount = response.json()["amount"]
-        except:
-            logger.error("[task] API wrong response")
-            # temprorary exception
-            raise Exception("Key error: [amount] was not found in Response")
+
+        if image_is_valid:
+
+            # Model image_path is a url to static file
+            response = requests.post(
+                "http://api:8000/cars_on_border",
+                # Use the biggest YOLO model
+                params={"model_size": "yolov5x"},
+                data={"image_path": model.image_path},
+                # timeout for (connection , read)
+                timeout=(5, 30),
+            )
+            if response.status_code != 200:
+                # Temporary exception
+                raise Exception("Non 200 API Response")
+            try:
+                number_of_cars = response.json()["amount"]
+            except:
+                logger.error("[task] API wrong response")
+                # temprorary exception
+                raise Exception("Key error: [amount] was not found in Response")
+        else:
+            number_of_cars = None
 
         upd = BorderCapture.update(
-            number_of_cars=response_amount,
+            number_of_cars=number_of_cars,
             processed_at=datetime.datetime.utcnow().timestamp(),
             processed=True,
+            is_valid=image_is_valid,
         ).where(BorderCapture.id == image_id)
         upd.execute()
 

@@ -33,8 +33,9 @@ def is_black(img: Image, threshold=0.99):
         return False
 
 
-def is_similar(image_url_1, image_url_2, url: bool = False):
-    if url:
+def is_similar(image_1, image_2):
+    if isinstance(image_1, str) and image_1.startswith("http"):
         image_url_1 = requests.get(image_url_1, stream=True).raw
+    if isinstance(image_2, str) and image_2.startswith("http"):
         image_url_2 = requests.get(image_url_2, stream=True).raw
     return image_url_1 == image_url_2
