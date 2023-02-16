@@ -135,19 +135,18 @@ async def validate_photo_for_processing(
     except:
         raise HTTPException(status_code=404, detail={"ValueError": "Image Not Found."})
 
-    # Retrieve last valid image from database
-    with database:
-        last_valid_image_path = (
-            BorderCapture.select(BorderCapture.image_path)
-            .order_by(BorderCapture.processed_at.desc())
-            .where(BorderCapture.is_valid==True)
-            .limit(1)
-            .first()
-            .image_path
-        )
-
     # Retrieve last valid image from filesystem
     try:
+        # Retrieve last valid image from database
+        with database:
+            last_valid_image_path = (
+                BorderCapture.select(BorderCapture.image_path)
+                .order_by(BorderCapture.processed_at.desc())
+                .where(BorderCapture.is_valid==True)
+                .limit(1)
+                .first()
+                .image_path
+            )
         last_valid_image = Image.open(last_valid_image_path, "r")
     except:
         raise HTTPException(
