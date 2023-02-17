@@ -1,3 +1,2 @@
 [tool.isort]
 profile = "black"
-sections=FUTURE,STDLIB,FIRSTPARTY,THIRDPARTY,LOCALFOLDER

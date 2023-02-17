@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 from functools import lru_cache
 from io import BytesIO
@@ -5,8 +6,7 @@ from io import BytesIO
 import requests
 import torch
 from PIL import Image, ImageOps
-from fastapi import (Body, Depends, FastAPI, File, HTTPException, Query,
-                     UploadFile)
+from fastapi import Body, Depends, FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -140,10 +140,18 @@ async def validate_photo_for_processing(
     try:
         # Retrieve last valid image from database
         with database:
+            # Retrieve timestamp from image path
+            input_image_timestamp = int(image_path.split("/")[-1].split(".")[0])
+
             last_valid_image_path = (
                 BorderCapture.select(BorderCapture.image_path)
                 .order_by(BorderCapture.processed_at.desc())
-                .where(BorderCapture.is_valid == True)
+                .where(
+                    BorderCapture.is_valid == True,
+                    BorderCapture.created_at < input_image_timestamp
+                    if image_path
+                    else datetime.datetime.utcnow().timestamp(),
+                )
                 .limit(1)
                 .first()
                 .image_path

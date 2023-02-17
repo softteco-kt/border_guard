@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+
 # Step 5: Smoothing Transmission Map using Guided Filter
 # src: https://github.com/ba-san/Python-image-enhancement-with-bright-dark-prior/blob/master/src/guidedfilter.py
 from image_processing.guidedfilter import guided_filter
@@ -64,8 +65,6 @@ def get_corrected_transmission(I, A, darkch, brightch, init_t, alpha, omega, w):
                 corrected_t[i, j] = dark_t[i, j] * init_t[i, j]
 
     return np.abs(corrected_t)
-
-
 
 
 # Step 6: Calculating the Resultant Image
