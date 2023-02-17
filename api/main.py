@@ -102,18 +102,18 @@ async def get_db_information(
 
 @app.post("/is_valid")
 async def validate_photo_for_processing(
+    image_id: str = Body(None),
     image_url: str = Body(None),
-    image_path: str = Body(None),
     image_binary: UploadFile = File(None),
 ):
-    if not any([image_url, image_binary, image_path]):
+    if not any([image_url, image_binary, image_id]):
         raise HTTPException(
             status_code=422,
             detail={
                 "field error": "At least one of the values should be provided",
                 "values": {
+                    "image_id": image_id,
                     "image_url": image_url,
-                    "image_path": image_path,
                     "image_binary": image_binary,
                 },
             },
@@ -131,7 +131,9 @@ async def validate_photo_for_processing(
                     detail={"Invalid URL": response.content},
                 )
             image_to_process = Image.open(BytesIO(response.content))
-        elif image_path:
+        elif image_id:
+            with database:
+                image_path = BorderCapture.get(id=image_id).image_path
             image_to_process = Image.open(image_path, "r")
     except:
         raise HTTPException(status_code=404, detail={"ValueError": "Image Not Found."})
@@ -140,8 +142,8 @@ async def validate_photo_for_processing(
     try:
         # Retrieve last valid image from database
         with database:
-            # Retrieve timestamp from image path
-            input_image_timestamp = int(image_path.split("/")[-1].split(".")[0])
+            # Retrieve timestamp from image
+            input_image_timestamp = BorderCapture.get(id=image_id).created_at
 
             last_valid_image_path = (
                 BorderCapture.select(BorderCapture.image_path)
@@ -149,7 +151,7 @@ async def validate_photo_for_processing(
                 .where(
                     BorderCapture.is_valid == True,
                     BorderCapture.created_at < input_image_timestamp
-                    if image_path
+                    if image_id
                     else datetime.datetime.utcnow().timestamp(),
                 )
                 .limit(1)
@@ -187,19 +189,19 @@ async def validate_photo_for_processing(
 @app.post("/cars_on_border", response_model=CarsMetaData)
 async def count_cars_in_image(
     image_url: str = Body(None),
-    image_path: str = Body(None),
+    image_id: str = Body(None),
     image_binary: UploadFile = File(None),
     apply_grayscale: bool = False,
     model=Depends(get_model),
 ):
-    if not any([image_url, image_binary, image_path]):
+    if not any([image_url, image_binary, image_id]):
         raise HTTPException(
             status_code=422,
             detail={
                 "field error": "At least one of the values should be provided",
                 "values": {
                     "image_url": image_url,
-                    "image_path": image_path,
+                    "image_id": image_id,
                     "image_binary": image_binary,
                 },
             },
@@ -212,7 +214,9 @@ async def count_cars_in_image(
         elif image_url:
             response = requests.get(image_url)
             image_to_process = Image.open(BytesIO(response.content))
-        elif image_path:
+        elif image_id:
+            with database:
+                image_path = BorderCapture.get(id=image_id).image_path
             image_to_process = Image.open(image_path, "r")
     except:
         raise HTTPException(status_code=404, detail={"ValueError": "Image Not Found."})

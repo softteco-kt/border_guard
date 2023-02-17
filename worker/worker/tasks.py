@@ -26,11 +26,9 @@ def process_img(image_id):
     # init connection and automatically close when task is completed
     with database_connection:
 
-        model = BorderCapture.get(id=image_id)
-
         # Check if retrieved image is valid
         image_is_valid = requests.post(
-            "http://api:8000/is_valid", data={"image_path": model.image_path}
+            "http://api:8000/is_valid", data={"image_id": image_id}
         )
 
         if image_is_valid:
@@ -40,7 +38,7 @@ def process_img(image_id):
                 "http://api:8000/cars_on_border",
                 # Use the biggest YOLO model
                 params={"model_size": "yolov5x"},
-                data={"image_path": model.image_path},
+                data={"image_id": image_id},
                 # timeout for (connection , read)
                 timeout=(5, 30),
             )
@@ -64,4 +62,4 @@ def process_img(image_id):
         ).where(BorderCapture.id == image_id)
         upd.execute()
 
-        logger.info("[task] DB updated. ID: %r" % model.id)
+        logger.info("[task] DB updated. ID: %r" % image_id)
