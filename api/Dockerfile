@@ -28,11 +28,10 @@ FROM base as builder
 RUN apt-get update && \
 	apt-get -y install libpq-dev gcc
 
-COPY requirements.txt .
+COPY requirements.lock.txt .
 RUN pip3 install -U pip && \
 	pip3 install setuptools && \
-	pip3 install -r requirements.txt && \
-	pip3 install torch torchvision torchaudio \
+	pip3 install -r requirements.lock.txt \
 	--extra-index-url https://download.pytorch.org/whl/cpu
 
 FROM builder as final
