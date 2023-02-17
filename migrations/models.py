@@ -24,7 +24,7 @@ database = pw.PostgresqlDatabase(
 
 class BaseModel(pw.Model):
     id = pw.UUIDField(primary_key=True, default=uuid.uuid4)
-    created_at = pw.TimestampField(default=datetime.datetime.now().timestamp)
+    created_at = pw.TimestampField(default=datetime.datetime.utcnow().timestamp)
 
     class Meta:
         database = database
