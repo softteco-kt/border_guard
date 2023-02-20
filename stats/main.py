@@ -41,16 +41,6 @@ try:
                 input_ma = st.number_input("Moving average:", 0)
                 input_tf = st.selectbox("Bucket by", Timeframe.list())
 
-                # Filtering inputs
-                with st.expander(label="Included days: ", expanded=False):
-                    include_monday = st.checkbox("Monday", value=True)
-                    include_tuesday = st.checkbox("Tuesday", value=True)
-                    include_wednesday = st.checkbox("Wednesday", value=True)
-                    include_thursday = st.checkbox("Thursday", value=True)
-                    include_friday = st.checkbox("Friday", value=True)
-                    include_saturday = st.checkbox("Saturday", value=True)
-                    include_sunday = st.checkbox("Sunday", value=True)
-
                 # Utility datetime ranges that overwrite initial values
                 input_last_n_days = st.selectbox(
                     "Default datetime range: ",
@@ -62,6 +52,16 @@ try:
                     # Overwrite and disable initial date ranges
                     input_date_from = dt.today() - td(days=input_last_n_days)
                     input_date_to = dt.today() + td(days=1)
+
+                # Filtering inputs
+                with st.expander(label="Included days: ", expanded=False):
+                    include_monday = st.checkbox("Monday", value=True)
+                    include_tuesday = st.checkbox("Tuesday", value=True)
+                    include_wednesday = st.checkbox("Wednesday", value=True)
+                    include_thursday = st.checkbox("Thursday", value=True)
+                    include_friday = st.checkbox("Friday", value=True)
+                    include_saturday = st.checkbox("Saturday", value=True)
+                    include_sunday = st.checkbox("Sunday", value=True)
 
             included_days = []
             if include_monday:
