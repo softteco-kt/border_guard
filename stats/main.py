@@ -2,12 +2,28 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 
 import streamlit as st
+from streamlit import session_state as session
 
 from custom_charts import *
 from custom_enums import *
 from data import *
 
 st.set_page_config(layout="wide", page_title="Border Guard", page_icon="🧊")
+
+
+def get_raw_data(date_from, date_to):
+    # Get API data
+    raw_data = get_data(
+        date_from=date_from,
+        date_to=date_to,
+    )
+
+    raw_data = add_url_column(raw_data)
+
+    # Include only valid data
+    raw_data = raw_data[raw_data.is_valid == True]
+    return raw_data
+
 
 # Disable scrolling and remove menu
 css = """
@@ -26,8 +42,18 @@ st.title("Statistics")
 # Input for api filtering
 type_widget, from_widget, to_widget = st.columns(3)
 input_type = type_widget.selectbox("View", ["Aggregation", "Plain"])
-input_date_from = from_widget.date_input("Date From:", dt.today() - td(days=1))
-input_date_to = to_widget.date_input("Date To:", dt.today() + td(days=1))
+
+from_datetime_placeholder = from_widget.empty()
+session.date_from = from_datetime_placeholder.date_input(
+    "Date From:",
+    dt.today() - td(days=1),
+)
+
+to_datetime_placeholder = to_widget.empty()
+session.date_to = to_datetime_placeholder.date_input(
+    "Date To:",
+    dt.today() + td(days=1),
+)
 
 
 try:
@@ -50,8 +76,16 @@ try:
 
                 if input_last_n_days:
                     # Overwrite and disable initial date ranges
-                    input_date_from = dt.today() - td(days=input_last_n_days)
-                    input_date_to = dt.today() + td(days=1)
+                    session.date_from = dt.today() - td(days=input_last_n_days)
+                    session.date_to = dt.today() + td(days=1)
+
+                    # Redraw date widgets, show current date and disable
+                    from_datetime_placeholder.date_input(
+                        "Date from: ", session.date_from, disabled=True
+                    )
+                    to_datetime_placeholder.date_input(
+                        "Date to: ", session.date_to, disabled=True
+                    )
 
                 # Filtering inputs
                 with st.expander(label="Included days: ", expanded=False):
@@ -79,16 +113,7 @@ try:
             if include_sunday:
                 included_days.append(Weekdays.sunday)
 
-            # Get API data
-            raw_data = get_data(
-                date_from=input_date_from,
-                date_to=input_date_to,
-            )
-
-            raw_data = add_url_column(raw_data)
-
-            # Include only valid data
-            raw_data = raw_data[raw_data.is_valid == True]
+            raw_data = get_raw_data(session.date_from, session.date_to)
 
             # Convert created to datetime to use dt.day_of_week
             raw_data[Columns.day_of_week] = pd.to_datetime(
@@ -121,16 +146,7 @@ try:
                     "Aggregate by", [Timeframe.hourly, Timeframe.daily]
                 )
 
-            # Get API data
-            raw_data = get_data(
-                date_from=input_date_from,
-                date_to=input_date_to,
-            )
-
-            raw_data = add_url_column(raw_data)
-
-            # Include only valid data
-            raw_data = raw_data[raw_data.is_valid == True]
+            raw_data = get_raw_data(session.date_from, session.date_to)
 
             # Apply aggregation to data
             data = agg_data(
