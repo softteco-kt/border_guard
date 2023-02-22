@@ -1,10 +1,39 @@
 import os
+import functools
+import traceback
+import time
 
 import requests
 
 from models import BorderCapture, database
-from PIL import Image
-from send_msg import send_to_qu
+from send_msg import send_to_qu, logger
+
+
+def retry(f_py=None, retries=1):
+    """Decorator to retry a function call on failure N times."""
+
+    def _decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            re = retries
+            while re:
+
+                try:
+                    result = func(*args, **kwargs)
+                    return result
+                except Exception as e:
+                    time.sleep(3)
+                    re -= 1
+                    logger.error(traceback.format_exc(limit=1))
+                    logger.info(
+                        f"Failed. Retry attempt no.{retries - re}. In process ..."
+                    )
+                    if re == 0:
+                        raise e
+
+        return wrapper
+
+    return _decorator(f_py) if f_py else _decorator
 
 
 def write_untracked_images_to_db():

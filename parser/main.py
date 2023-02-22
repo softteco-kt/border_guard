@@ -1,7 +1,5 @@
 import datetime
 import os
-import sys
-import time
 
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -9,14 +7,15 @@ from seleniumbase import page_actions
 
 from models import BorderCapture, database
 from send_msg import logger, send_to_qu
+from utils import retry
 
 URL = os.environ["URL"]
 
-RETRY_ATTEMTPS = 5
+RETRY_ATTEMTPS = 3
 
 
-def fetch_image(retries=RETRY_ATTEMTPS):
-
+@retry(retries=RETRY_ATTEMTPS)
+def fetch_image():
     try:
         # Checking database connection
         database.connect()
@@ -51,16 +50,8 @@ def fetch_image(retries=RETRY_ATTEMTPS):
         send_to_qu(str(model.id))
 
     except Exception as e:
-
-        if retries == 0:
-            logger.exception(e)
-            sys.exit(1)
-
         driver.quit()
-        time.sleep(3)
-        logger.error(f"Fetch failed. Attempting retry...")
-        fetch_image(retries=retries - 1)
-
+        raise e
     driver.quit()
 
 
