@@ -1,7 +1,5 @@
 # Get current working directory
 HOME=$(pwd)
-# Set the URL
-URL='https://frame.pkpd.lt/lt/border/stream/checkpoint.sumskas/video.sumskas'
 # Get fetch interval variable
 MIN=$FETCH_INTERVAL
 # Create the cron job
@@ -10,6 +8,9 @@ MIN=$FETCH_INTERVAL
   printenv | grep "POSTGRES\|RABBIT\|\IMAGE"
   # Set cron HOME working directory
   echo HOME=${HOME}
-  echo URL=${URL}
-  echo "*/${MIN} * * * * $(which python3) main.py >> logs.log 2>&1"
+  while IFS=, read -r URL URL_LOCATION; do
+    echo URL=${URL}
+    echo URL_LOCATION=${URL_LOCATION}
+    echo "*/${MIN} * * * * $(which python3) main.py >> logs.log 2>&1"
+  done < urls.csv
 ) | crontab -
