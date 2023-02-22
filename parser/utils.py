@@ -1,7 +1,5 @@
 import os
-from io import BytesIO
 
-import imagehash
 import requests
 
 from models import BorderCapture, database
@@ -68,45 +66,3 @@ def process_unvalidated_images():
                 BorderCapture.id == image.id
             )
             upd.execute()
-
-
-def process_similar_imghash():
-    with database:
-        images = BorderCapture.select().where(BorderCapture.is_valid == True)
-
-        for indx, image in enumerate(images):
-            is_valid = True
-            base_url = "http://api:8000/static/"
-            assert image == images[indx]
-
-            image1 = Image.open(
-                BytesIO(
-                    requests.get(
-                        base_url + images[indx].image_path.split("/")[-1]
-                    ).content
-                )
-            )
-            image2 = Image.open(
-                BytesIO(
-                    requests.get(
-                        base_url + images[indx - 1].image_path.split("/")[-1]
-                    ).content
-                )
-            )
-
-            ihash1 = imagehash.phash(image1)
-            ihash2 = imagehash.phash(image2)
-
-            if ihash1 == ihash2:
-                is_valid = False
-                print(
-                    "image hashes are similar",
-                    image.image_path,
-                    images[indx - 1].image_path,
-                )
-                print("image hashes distance is equal to", ihash1 - ihash2)
-
-            # upd = BorderCapture.update(is_valid=is_valid).where(
-            #     BorderCapture.id == image.id
-            # )
-            # upd.execute()
