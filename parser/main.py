@@ -5,11 +5,12 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from seleniumbase import page_actions
 
-from models import BorderCapture, database
+from models import BorderCapture, Camera, database
 from send_msg import logger, send_to_qu
 from utils import retry
 
 URL = os.environ["URL"]
+URL_LOCATION = os.environ["URL_LOCATION"]
 
 RETRY_ATTEMTPS = 3
 
@@ -42,7 +43,10 @@ def fetch_image():
         logger.info(f"[parser] Successfuly fetched an image - {img_name}!")
 
         with database:
+            camera_id = Camera.get_or_create(location_name=URL_LOCATION)[0].id
+
             model = BorderCapture.create(
+                camera_id=camera_id,
                 image_path=os.getcwd() + "/data/" + img_name,
             )
 

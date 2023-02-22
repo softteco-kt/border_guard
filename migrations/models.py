@@ -31,8 +31,17 @@ class BaseModel(pw.Model):
         evolve = False  # automatic migrations are ignored for this model
 
 
+class Camera(BaseModel):
+    location_name = pw.CharField(max_length=255)
+
+    class Meta:
+        evolve = True
+
+
 class BorderCapture(BaseModel):
-    image_path = pw.CharField(unique=True)
+    camera = pw.ForeignKeyField(Camera, null=True)
+
+    image_path = pw.CharField()
     processed = pw.BooleanField(default=False)
     processed_at = pw.TimestampField(null=True)
 

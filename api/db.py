@@ -29,13 +29,19 @@ class BaseModel(pw.Model):
         database = database
 
 
+class Camera(BaseModel):
+    location_name = pw.CharField(max_length=255)
+
+
 class BorderCapture(BaseModel):
-    image_path = pw.CharField(unique=True)
+    camera = pw.ForeignKeyField(Camera)
+
+    image_path = pw.CharField()
     processed = pw.BooleanField(default=False)
     processed_at = pw.TimestampField(null=True)
 
     number_of_cars = pw.IntegerField(null=True)
-    is_valid = pw.BooleanField()
+    is_valid = pw.BooleanField(null=True)
 
 
 # one-to-many bounding boxes to border image instances, can have multiple bounding boxes
