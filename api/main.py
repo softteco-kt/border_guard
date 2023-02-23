@@ -10,7 +10,7 @@ from fastapi import Body, Depends, FastAPI, File, HTTPException, Query, UploadFi
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from db import AxisAlignedBoundingBoxNorm, BorderCapture, database
+from db import AxisAlignedBoundingBoxNorm, Camera, BorderCapture, database
 from schemas import BorderCaptureOut, CarsMetaData
 from image_processing.utils import is_black, is_similar
 
@@ -72,7 +72,15 @@ async def get_db_information(
     limit: int | None = None,
 ):
     with database:
-        query = BorderCapture.select()
+        query = BorderCapture.select(
+            BorderCapture.id,
+            BorderCapture.created_at,
+            BorderCapture.processed_at,
+            BorderCapture.number_of_cars,
+            BorderCapture.image_path,
+            BorderCapture.is_valid,
+            Camera.location_name,
+        ).join(Camera)
 
         if start_timestamp:
             query = query.where(BorderCapture.created_at >= start_timestamp)

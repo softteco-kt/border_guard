@@ -21,13 +21,21 @@ class CarsMetaData(BaseModel):
     amount: int
 
 
+class Camera(BaseModel):
+    location_name: str
+
+    class Config:
+        orm_mode = True
+
+
 class BorderCaptureOut(BaseModel):
     id: UUID
-    created_at: datetime.datetime
+    camera: Camera
     image_path: str
+    created_at: datetime.datetime
+    processed_at: datetime.datetime | None = None
     number_of_cars: int | None = None
     processed: bool | None = None
-    processed_at: datetime.datetime | None = None
     is_valid: bool | None = None
 
     class Config:
