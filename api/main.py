@@ -53,11 +53,6 @@ def get_model(model_size: Yolov5 = Yolov5.nano):
 
 @app.on_event("startup")
 def startup():
-    # Create DB if not exists
-    database.connect()
-    database.create_tables([BorderCapture, AxisAlignedBoundingBoxNorm])
-    database.close()
-
     # Download and cache Yolov5 model variants
     for i in Yolov5:
         get_model(i)
@@ -153,7 +148,7 @@ async def validate_photo_for_processing(
             # Retrieve timestamp from image
             input_image_timestamp = BorderCapture.get(id=image_id).created_at
 
-            last_valid_image_path = (
+            last_valid_image_instance = (
                 BorderCapture.select(BorderCapture.image_path)
                 .order_by(BorderCapture.processed_at.desc())
                 .where(
@@ -164,10 +159,12 @@ async def validate_photo_for_processing(
                 )
                 .limit(1)
                 .first()
-                .image_path
             )
-        last_valid_image = Image.open(last_valid_image_path, "r")
-    except:
+        if not last_valid_image_instance:
+            print("No valid preceding image found.")
+        else:
+            last_valid_image = Image.open(last_valid_image_instance.image_path, "r")
+    except Exception as e:
         raise HTTPException(
             status_code=422,
             detail={

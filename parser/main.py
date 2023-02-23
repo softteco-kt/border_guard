@@ -1,5 +1,6 @@
 import datetime
 import os
+import traceback
 
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -10,19 +11,13 @@ from send_msg import logger, send_to_qu
 from utils import retry
 
 URL = os.environ["URL"]
-URL_LOCATION = os.environ["URL_LOCATION"]
+CAMERA_LOCATION = os.environ["URL_LOCATION"]
 
-RETRY_ATTEMTPS = 3
+RETRY_ATTEMTPS = 5
 
 
 @retry(retries=RETRY_ATTEMTPS)
 def fetch_image():
-    try:
-        # Checking database connection
-        database.connect()
-    except:
-        raise Exception("Database connection can not be established.")
-
     options = uc.ChromeOptions()
     options.add_argument("--no-sandbox")
     options.add_argument("--headless=chrome")
@@ -31,29 +26,39 @@ def fetch_image():
     driver = uc.Chrome(options=options, driver_executable_path="./chromedriver")
 
     try:
+        try:
+            # Check the database connection before fetching the image
+            database.connect(reuse_if_open=True)
+        except:
+            logger.error(traceback.format_exc(limit=1))
+            raise Exception("Database connection can not be established.")
+
         driver.get(URL)
 
         page_actions.wait_for_element(driver, selector="videoImage", by=By.ID)
 
         image = driver.find_element(By.ID, "videoImage")
-        img_name = str(int(datetime.datetime.utcnow().timestamp())) + ".png"
-        image.screenshot("./data/" + img_name)
+        image_name = str(int(datetime.datetime.utcnow().timestamp())) + ".png"
 
-        assert img_name in os.listdir("./data/")
-        logger.info(f"[parser] Successfuly fetched an image - {img_name}!")
+        image_location = CAMERA_LOCATION + "/" + image_name
 
-        with database:
-            camera_id = Camera.get_or_create(location_name=URL_LOCATION)[0].id
+        # Save image to folder with a relative location
+        image.screenshot("./data/" + image_location)
 
-            model = BorderCapture.create(
-                camera_id=camera_id,
-                image_path=os.getcwd() + "/data/" + img_name,
-            )
+        assert image_name in os.listdir("./data/" + CAMERA_LOCATION + "/")
+        logger.info(f"[parser] Successfuly fetched an image - {image_name}!")
+
+        camera_id = Camera.get_or_create(location_name=CAMERA_LOCATION)[0].id
+
+        model = BorderCapture.create(
+            camera_id=camera_id,
+            image_path=os.getcwd() + "/data/" + image_location,
+        )
+        database.close()
     except Exception as e:
         driver.quit()
         raise e
     driver.quit()
-
     # ID is of type UUID, thus conversion req.
     return str(model.id)
 
