@@ -49,15 +49,15 @@ def fetch_image():
                 camera_id=camera_id,
                 image_path=os.getcwd() + "/data/" + img_name,
             )
-
-        # ID is of type UUID, thus conversion req.
-        send_to_qu(str(model.id))
-
     except Exception as e:
         driver.quit()
         raise e
     driver.quit()
 
+    # ID is of type UUID, thus conversion req.
+    return str(model.id)
+
 
 if __name__ == "__main__":
-    fetch_image()
+    image_id = fetch_image()
+    send_to_qu(image_id)
