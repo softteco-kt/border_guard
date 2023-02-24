@@ -22,13 +22,14 @@ stdout_handler.setFormatter(formatter)
 logger.addHandler(stdout_handler)
 
 
-class BaseTask(celery.Task):
+class LogErrorsTask(celery.Task):
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         logger.info("{0!r} failed: {1!r}".format(task_id, exc))
-        logger.info(einfo)
+        # logger.exception("Celery task failed.", exc_info=exc)
+        super(LogErrorsTask, self).on_failure(exc, task_id, args, kwargs, einfo)
 
 
-@app.task(base=BaseTask, acks_late=True)
+@app.task(base=LogErrorsTask, ack_late=True)
 def process_img(image_id):
     # init connection and automatically close when task is completed
     with database_connection:
