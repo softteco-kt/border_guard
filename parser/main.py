@@ -46,7 +46,9 @@ def fetch_image():
         image.screenshot("./data/" + image_location)
 
         assert image_name in os.listdir("./data/" + CAMERA_LOCATION + "/")
-        logger.info(f"[parser] Successfuly fetched an image - {image_name}!")
+        logger.info(
+            f"[parser] Successfuly fetched an image - {image_name} at {CAMERA_LOCATION}!"
+        )
 
         camera_id = Camera.get_or_create(location_name=CAMERA_LOCATION)[0].id
 

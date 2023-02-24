@@ -3,6 +3,7 @@ import logging
 import sys
 
 import requests
+import celery
 
 from models import BorderCapture
 from models import database as database_connection
@@ -21,7 +22,13 @@ stdout_handler.setFormatter(formatter)
 logger.addHandler(stdout_handler)
 
 
-@app.task(acks_late=True)
+class BaseTask(celery.Task):
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        logger.info("{0!r} failed: {1!r}".format(task_id, exc))
+        logger.info(einfo)
+
+
+@app.task(base=BaseTask, acks_late=True)
 def process_img(image_id):
     # init connection and automatically close when task is completed
     with database_connection:
