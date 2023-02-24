@@ -164,19 +164,19 @@ async def validate_photo_for_processing(
             print("No valid preceding image found.")
         else:
             last_valid_image = Image.open(last_valid_image_instance.image_path, "r")
+
+            if is_similar(image_to_process, last_valid_image):
+                raise HTTPException(
+                    status_code=422,
+                    detail={
+                        "field error": "Image is similar to previous image",
+                    },
+                )
     except Exception as e:
         raise HTTPException(
             status_code=422,
             detail={
                 "field error": "No image found in filesystem",
-            },
-        )
-
-    if is_similar(image_to_process, last_valid_image):
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "field error": "Image is similar to previous image",
             },
         )
 
