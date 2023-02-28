@@ -1,4 +1,6 @@
 import datetime
+import logging
+import traceback
 from enum import Enum
 from functools import lru_cache
 from io import BytesIO
@@ -11,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from db import AxisAlignedBoundingBoxNorm, Camera, BorderCapture, database
-from schemas import BorderCaptureOut, CarsMetaData
+from schemas import BorderCaptureOut, CarsMetaData, CameraOut
 from image_processing.utils import is_black, is_similar
 
 app = FastAPI()
@@ -58,8 +60,15 @@ def startup():
         get_model(i)
 
 
+@app.get("/camera_locations", response_model=list[CameraOut])
+async def get_camera_locations():
+    with database:
+        return list(Camera.select())
+
+
 @app.get("/cars_on_border", response_model=list[BorderCaptureOut])
 async def get_db_information(
+    location: str | None = None,
     processed: bool | None = None,
     start_timestamp: int | None = None,
     end_timestamp: int | None = None,
@@ -83,6 +92,11 @@ async def get_db_information(
             query = query.where(BorderCapture.created_at <= end_timestamp)
         if processed:
             query = query.where(BorderCapture.processed == processed)
+        if location:
+            location_exists = Camera.get_or_none(Camera.location_name == location)
+            if not location_exists:
+                raise HTTPException(status_code=404, detail="Location does not exist.")
+            query = query.where(Camera.location_name == location)
 
         # If neither of timestamps are given, set default or given offset / limit
         if not any([start_timestamp, end_timestamp]):
@@ -146,13 +160,16 @@ async def validate_photo_for_processing(
         # Retrieve last valid image from database
         with database:
             # Retrieve timestamp from image
-            input_image_timestamp = BorderCapture.get(id=image_id).created_at
+            input_image_instance = BorderCapture.get(id=image_id)
+            input_image_timestamp = input_image_instance.created_at
+            input_image_loc = input_image_instance.camera
 
             last_valid_image_instance = (
                 BorderCapture.select(BorderCapture.image_path)
                 .order_by(BorderCapture.processed_at.desc())
                 .where(
                     BorderCapture.is_valid == True,
+                    BorderCapture.camera_id == input_image_loc,
                     BorderCapture.created_at < input_image_timestamp
                     if image_id
                     else datetime.datetime.utcnow().timestamp(),
@@ -166,29 +183,22 @@ async def validate_photo_for_processing(
             last_valid_image = Image.open(last_valid_image_instance.image_path, "r")
 
             if is_similar(image_to_process, last_valid_image):
-                raise HTTPException(
-                    status_code=422,
-                    detail={
-                        "field error": "Image is similar to previous image",
-                    },
-                )
+                return {
+                    "is_valid": False,
+                    "detail": "Image is similar to previously processed one.",
+                }
     except Exception as e:
+        logging.exception(traceback.format_exc(limit=1))
         raise HTTPException(
-            status_code=422,
+            status_code=404,
             detail={
                 "field error": "No image found in filesystem",
             },
         )
 
     if is_black(image_to_process):
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "field error": "Image is black",
-            },
-        )
-
-    return True
+        return {"is_valid": False, "detail": "Image is black"}
+    return {"is_valid": True}
 
 
 @app.post("/cars_on_border", response_model=CarsMetaData)

@@ -21,7 +21,7 @@ class CarsMetaData(BaseModel):
     amount: int
 
 
-class Camera(BaseModel):
+class CameraOut(BaseModel):
     location_name: str
 
     class Config:
@@ -30,7 +30,7 @@ class Camera(BaseModel):
 
 class BorderCaptureOut(BaseModel):
     id: UUID
-    camera: Camera
+    camera: CameraOut
     image_path: str
     created_at: datetime.datetime
     processed_at: datetime.datetime | None = None
