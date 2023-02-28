@@ -26,12 +26,12 @@ logger.setLevel(logging.INFO)
 
 class LogErrorsTask(celery.Task):
     autoretry_for = (Exception,)
-    retry_kwargs = {"max_retries": 5, "interval_start": 3}
-    retry_backoff = True
+    retry_kwargs = {"max_retries": 5}
+    retry_backoff = 30
 
     def on_retry(self, exc, task_id, args, kwargs, einfo):
         logger.info(
-            f"Task {task_id} with args: {args} failed. Retries left, {self.max_retries - self.request.retries}"
+            f"Task {task_id} with args: {args} failed. Retries left, {self.max_retries - self.request.retries + 1}. Exception: {exc}"
         )
         # logger.exception(f"Task failed with exception: {exc}")
         return super().on_retry(exc, task_id, args, kwargs, einfo)
@@ -46,19 +46,22 @@ def process_img(self, image_id):
     # init connection and automatically close when task is completed
     with database_connection:
 
+        # Check if retrieved image is valid
+        is_valid_response = requests.post(
+            "http://api:8000/is_valid",
+            data={"image_id": image_id},
+            timeout=(5, 30),
+        )
+
         try:
-            # Check if retrieved image is valid
-            image_is_valid = requests.post(
-                "http://api:8000/is_valid",
-                data={"image_id": image_id},
-                timeout=(5, 30),
-            )
-            assert image_is_valid.status_code == 200
+            # Check API accessibility (whether it works or not)
+            assert is_valid_response.status_code == 200, is_valid_response.json()
         except Exception as e:
-            logger.error(traceback.format_exc(limit=1))
+            logger.error(f"{is_valid_response.json()}, {traceback.format_exc(limit=1)}")
             raise Exception("API probably not accessible")
 
-        if image_is_valid:
+        is_valid = is_valid_response.json().get("is_valid")
+        if is_valid:
 
             # Model image_path is a url to static file
             response = requests.post(
@@ -79,13 +82,14 @@ def process_img(self, image_id):
                 # temprorary exception
                 raise Exception("Key error: [amount] was not found in Response")
         else:
+            logger.info(f"[task] Image is not valid, {is_valid_response.json()}")
             number_of_cars = None
 
         upd = BorderCapture.update(
             number_of_cars=number_of_cars,
             processed_at=datetime.datetime.utcnow().timestamp(),
             processed=True,
-            is_valid=image_is_valid,
+            is_valid=is_valid,
         ).where(BorderCapture.id == image_id)
         upd.execute()
 
