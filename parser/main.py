@@ -1,3 +1,4 @@
+import csv
 import datetime
 import os
 import traceback
@@ -10,14 +11,17 @@ from models import BorderCapture, Camera, database
 from send_msg import logger, send_to_qu
 from utils import retry
 
-URL = os.environ["URL"]
-CAMERA_LOCATION = os.environ["URL_LOCATION"]
-
 RETRY_ATTEMTPS = 5
 
 
 @retry(retries=RETRY_ATTEMTPS)
-def fetch_image():
+def fetch_image(url, location):
+
+    if not url:
+        url = os.environ["URL"]
+    if not location:
+        location = os.environ["URL_LOCATION"]
+
     options = uc.ChromeOptions()
     options.add_argument("--no-sandbox")
     options.add_argument("--headless=chrome")
@@ -33,24 +37,24 @@ def fetch_image():
             logger.error(traceback.format_exc(limit=1))
             raise Exception("Database connection can not be established.")
 
-        driver.get(URL)
+        driver.get(url)
 
         page_actions.wait_for_element(driver, selector="videoImage", by=By.ID)
 
         image = driver.find_element(By.ID, "videoImage")
         image_name = str(int(datetime.datetime.utcnow().timestamp())) + ".png"
 
-        image_location = CAMERA_LOCATION + "/" + image_name
+        image_location = location + "/" + image_name
 
         # Save image to folder with a relative location
         image.screenshot("./data/" + image_location)
 
-        assert image_name in os.listdir("./data/" + CAMERA_LOCATION + "/")
+        assert image_name in os.listdir("./data/" + location + "/")
         logger.info(
-            f"[parser] Successfuly fetched an image - {image_name} at {CAMERA_LOCATION}!"
+            f"[parser] Successfuly fetched an image - {image_name} at {location}!"
         )
 
-        camera_id = Camera.get_or_create(location_name=CAMERA_LOCATION)[0].id
+        camera_id = Camera.get_or_create(location_name=location)[0].id
 
         model = BorderCapture.create(
             camera_id=camera_id,
@@ -66,5 +70,14 @@ def fetch_image():
 
 
 if __name__ == "__main__":
-    image_id = fetch_image()
-    send_to_qu(image_id)
+
+    with open("urls.csv", "r") as f:
+
+        sources = csv.reader(f)
+
+        for row in sources:
+
+            url, location = row
+
+            image_id = fetch_image(url, location)
+            send_to_qu(image_id)

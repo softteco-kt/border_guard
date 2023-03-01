@@ -4,7 +4,7 @@
 python3 check_folders.py
 
 # Setup cron with crontab
-sh setup_cron.sh
+( python3 setup_cron.py ) | crontab -
 
 # Redirecting output of non pid 1 process to docker logs
 tail -n 0 -q -F /usr/src/parser/*.log >> /proc/1/fd/1 &
