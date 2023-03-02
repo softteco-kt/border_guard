@@ -31,13 +31,14 @@ def get_data(
 
 def add_url_column(data: pd.DataFrame) -> pd.DataFrame:
     data[Columns.image] = (
-        "http://api:8000/static/"
+        "http://164.92.167.135:8000/static/"
         + data["image_path"]
         .str.split(
             "/usr/src/parser/data/",
         )
         .str[1]
     )
+
     return data
 
 
