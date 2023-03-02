@@ -4,6 +4,7 @@ from datetime import timedelta as td
 import numpy as np
 import pandas as pd
 import requests
+from streamlit import session_state as session
 
 from custom_enums import *
 
@@ -17,9 +18,9 @@ def get_data(
     date_to: dt.date = None,
 ) -> pd.DataFrame:
     response = requests.get(
-        # "http://api:8000/cars_on_border",
-        "http://164.92.167.135:8000/cars_on_border",
+        "http://api:8000/cars_on_border",
         params={
+            "location": session.location,
             "processed": True,
             "start_timestamp": date_to_timestamp(date_from),
             "end_timestamp": date_to_timestamp(date_to),
@@ -30,7 +31,7 @@ def get_data(
 
 def add_url_column(data: pd.DataFrame) -> pd.DataFrame:
     data[Columns.image] = (
-        "http://164.92.167.135:8000/static/"
+        "http://api:8000/static/"
         + data["image_path"]
         .str.split(
             "/usr/src/parser/data/",

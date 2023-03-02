@@ -60,10 +60,10 @@ def startup():
         get_model(i)
 
 
-@app.get("/camera_locations", response_model=list[CameraOut])
+@app.get("/camera_locations", response_model=list)
 async def get_camera_locations():
     with database:
-        return list(Camera.select())
+        return [camera.location_name for camera in Camera.select()]
 
 
 @app.get("/cars_on_border", response_model=list[BorderCaptureOut])

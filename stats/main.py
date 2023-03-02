@@ -25,6 +25,10 @@ def get_raw_data(date_from, date_to):
     return raw_data
 
 
+def get_camera_locations():
+    locations = requests.get("http://api:8000/camera_locations")
+    return locations.json()
+
 # Disable scrolling and remove menu
 css = """
         <style>
@@ -40,7 +44,8 @@ st.markdown(css, unsafe_allow_html=True)
 st.title("Statistics")
 
 # Input for api filtering
-type_widget, from_widget, to_widget = st.columns(3)
+location_widget, type_widget, from_widget, to_widget = st.columns(4)
+input_location = location_widget.selectbox("Location", get_camera_locations(), key="location")
 input_type = type_widget.selectbox("View", ["Aggregation", "Plain"])
 
 from_datetime_placeholder = from_widget.empty()
