@@ -163,5 +163,4 @@ try:
     st.altair_chart(chart, use_container_width=True)
     st.write("*\* Time is in UTC*")
 except Exception as e:
-    e
     st.write("No data...")
