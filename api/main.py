@@ -12,6 +12,7 @@ from fastapi import Body, Depends, FastAPI, File, HTTPException, Query, UploadFi
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from weights import Yolov5
 from db import AxisAlignedBoundingBoxNorm, Camera, BorderCapture, database
 from schemas import BorderCaptureOut, CarsMetaData, CameraOut
 from image_processing.utils import is_black, is_similar
@@ -32,16 +33,6 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="/usr/src/parser/data"), name="static")
 
 
-class Yolov5(str, Enum):
-    """YOLOv5 available model distribution/size names."""
-
-    nano = "yolov5n"
-    small = "yolov5s"
-    medium = "yolov5m"
-    large = "yolov5l"
-    extra = "yolov5x"
-
-
 @lru_cache
 def get_model(model_size: Yolov5 = Yolov5.nano):
     """
@@ -49,15 +40,13 @@ def get_model(model_size: Yolov5 = Yolov5.nano):
     and weights of pre-trained model, to current directory.
     """
     return torch.hub.load(
-        "ultralytics/yolov5", model_size, pretrained=True, force_reload=False
+        repo_or_dir="ultralytics/yolov5",
+        source="github",
+        model=model_size,
+        force_reload=False,
+        pretrained=True,
+        verbose=False,
     )
-
-
-@app.on_event("startup")
-def startup():
-    # Download and cache Yolov5 model variants
-    for i in Yolov5:
-        get_model(i)
 
 
 @app.get("/camera_locations", response_model=list)

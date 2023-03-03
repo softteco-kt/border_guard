@@ -42,4 +42,7 @@ RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8000
 
+# Download pre-trained model weights
+RUN python -m weights
+
 CMD ["sh", "./docker-entrypoint.sh"]
